@@ -1,0 +1,183 @@
+import { CommonModule } from '@angular/common';
+import { Component, signal } from '@angular/core';
+import { RouterModule } from '@angular/router';
+
+@Component({
+  selector: 'app-about',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  template: `
+    <div class="min-h-screen bg-[#080c14] py-12 px-4 sm:px-6 lg:px-8 text-slate-100">
+      <div class="max-w-6xl mx-auto space-y-16">
+        
+        <!-- CABECERA INSTITUCIONAL -->
+        <div class="text-center max-w-3xl mx-auto">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-950/50 border border-sky-800/60 text-sky-400 text-xs font-semibold uppercase tracking-wider mb-4">
+            Identidad Institucional
+          </div>
+          <h1 class="text-3xl sm:text-5xl font-black text-white tracking-tight">
+            ¿Qué es <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-400">MediShare</span>?
+          </h1>
+          <p class="mt-4 text-base sm:text-lg text-slate-300 leading-relaxed">
+            Una infraestructura tecnológica y sanitaria diseñada para transformar el desperdicio de medicamentos útiles en una red solidaria de abastecimiento para clínicas comunitarias.
+          </p>
+        </div>
+
+        <!-- EL PROBLEMA VS NUESTRA SOLUCIÓN -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          
+          <!-- La Problemática -->
+          <div class="p-8 rounded-3xl bg-slate-900/80 border border-rose-900/30 relative overflow-hidden">
+            <div class="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center font-bold text-xl mb-6">
+              ⚠️
+            </div>
+            <h3 class="text-xl font-bold text-white mb-3">La Problemática Crítica</h3>
+            <p class="text-sm text-slate-300 leading-relaxed mb-4">
+              A nivel mundial, toneladas de medicamentos no utilizados terminan en la basura debido a recuperaciones anticipadas de pacientes o cambios de prescripción médica.
+            </p>
+            <ul class="space-y-2.5 text-xs text-slate-400">
+              <li class="flex items-start gap-2">
+                <span class="text-rose-400 font-bold">•</span>
+                <span>Desperdicio económico y ambiental masivo de fármacos aún vigentes.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-rose-400 font-bold">•</span>
+                <span>Desabastecimiento crónico en dispensarios y clínicas de bajos recursos.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-rose-400 font-bold">•</span>
+                <span>Falta de canales transparentes que garanticen la seguridad y el empaque original.</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- La Solución MediShare -->
+          <div class="p-8 rounded-3xl bg-slate-900/80 border border-emerald-900/30 relative overflow-hidden">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xl mb-6">
+              🌱
+            </div>
+            <h3 class="text-xl font-bold text-white mb-3">Nuestra Respuesta Tecnológica</h3>
+            <p class="text-sm text-slate-300 leading-relaxed mb-4">
+              MediShare actúa como un puente digital estricto que conecta a ciudadanos donantes con instituciones médicas acreditadas bajo rigurosa auditoría sanitaria.
+            </p>
+            <ul class="space-y-2.5 text-xs text-slate-400">
+              <li class="flex items-start gap-2">
+                <span class="text-emerald-400 font-bold">•</span>
+                <span><strong>Filtro Sanitario 90 Días:</strong> Bloqueo automático de fármacos con menos de 3 meses de vida útil.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-emerald-400 font-bold">•</span>
+                <span><strong>Trazabilidad por Lote:</strong> Cada donación cuenta con código de seguimiento único auditado.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-emerald-400 font-bold">•</span>
+                <span><strong>Asignación Directa:</strong> Distribución en tiempo real hacia pacientes en tratamiento activo.</span>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+
+        <!-- NUESTROS 3 PILARES FUNDAMENTALES -->
+        <div class="bg-gradient-to-b from-slate-900/90 to-[#0c121e] border border-slate-800 rounded-3xl p-8 sm:p-12 shadow-xl">
+          <div class="text-center max-w-2xl mx-auto mb-10">
+            <span class="text-xs font-bold text-sky-400 uppercase tracking-wider">Compromiso con la Salud Pública</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">Los Tres Pilares de MediShare</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            
+            <div class="p-6 rounded-2xl bg-slate-950/60 border border-slate-800 flex flex-col items-center">
+              <div class="w-14 h-14 rounded-2xl bg-sky-500/15 text-sky-400 flex items-center justify-center text-2xl mb-4 border border-sky-500/30">
+                🛡️
+              </div>
+              <h3 class="text-base font-bold text-white mb-2">1. Rigor Sanitario</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Ningún medicamento se distribuye sin pasar por la validación de empaque íntegro, conservación adecuada y margen de caducidad estricto.
+              </p>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-slate-950/60 border border-slate-800 flex flex-col items-center">
+              <div class="w-14 h-14 rounded-2xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-2xl mb-4 border border-emerald-500/30">
+                🤝
+              </div>
+              <h3 class="text-base font-bold text-white mb-2">2. Equidad y Gratuidad</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Los medicamentos donados son entregados de forma 100% gratuita a personas vulnerables que no pueden costear sus tratamientos.
+              </p>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-slate-950/60 border border-slate-800 flex flex-col items-center">
+              <div class="w-14 h-14 rounded-2xl bg-amber-500/15 text-amber-400 flex items-center justify-center text-2xl mb-4 border border-amber-500/30">
+                📊
+              </div>
+              <h3 class="text-base font-bold text-white mb-2">3. Transparencia Abierta</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Métricas auditadas en tiempo real, registro de movimientos y panel de trazabilidad para cada actor involucrado.
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- PREGUNTAS FRECUENTES (FAQ) -->
+        <div class="space-y-6">
+          <div class="text-center">
+            <span class="text-xs font-bold text-sky-400 uppercase tracking-wider">Dudas Frecuentes</span>
+            <h2 class="text-2xl font-bold text-white mt-1">Preguntas Frecuentes</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
+            
+            <div class="p-5 rounded-2xl bg-slate-900/60 border border-slate-800">
+              <h3 class="text-sm font-bold text-sky-300 mb-1.5">¿Qué tipo de medicamentos puedo donar?</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Aceptamos comprimidos, cápsulas, jarabes e inhaladores que se encuentren en su caja original, sellados y con fecha de caducidad visible que supere los 3 meses.
+              </p>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-slate-900/60 border border-slate-800">
+              <h3 class="text-sm font-bold text-sky-300 mb-1.5">¿Por qué se exige un mínimo de 90 días de vigencia?</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Para garantizar el tiempo suficiente de traslado, inspección en centro de acopio y administración segura del tratamiento completo al paciente receptor.
+              </p>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-slate-900/60 border border-slate-800">
+              <h3 class="text-sm font-bold text-sky-300 mb-1.5">¿Quiénes son las clínicas beneficiarias?</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Dispensarios comunitarios, asilos, centros de salud de zonas rurales y fundaciones acreditadas con licencia sanitaria vigente.
+              </p>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-slate-900/60 border border-slate-800">
+              <h3 class="text-sm font-bold text-sky-300 mb-1.5">¿Tiene algún costo para el donante o la clínica?</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                No. MediShare es una plataforma comunitaria y social sin fines de lucro, financiada mediante alianzas de impacto y el ODS 3.
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- CTA FINAL -->
+        <div class="p-10 rounded-3xl bg-gradient-to-r from-sky-950/60 via-slate-900 to-emerald-950/40 border border-slate-800 text-center flex flex-col items-center justify-center gap-4">
+          <h2 class="text-2xl font-black text-white">¿Listo para formar parte de la solución?</h2>
+          <p class="text-xs sm:text-sm text-slate-300 max-w-xl">
+            Tus medicamentos sin uso pueden salvar una vida hoy mismo. Regístrate o realiza tu donación en menos de 2 minutos.
+          </p>
+          <div class="flex flex-col sm:flex-row items-center gap-3 mt-2">
+            <a routerLink="/donar" class="btn-clinical text-xs py-3 px-6 rounded-xl font-bold shadow-lg shadow-sky-500/20">
+              Realizar una Donación
+            </a>
+            <a routerLink="/registro" class="btn-secondary-outline text-xs py-3 px-6 rounded-xl font-bold">
+              Crear una Cuenta
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  `,
+})
+export class AboutComponent {}

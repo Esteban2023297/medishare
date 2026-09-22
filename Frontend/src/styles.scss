@@ -1,0 +1,185 @@
+@import "tailwindcss";
+
+:root {
+  /* Paleta MediShare - Modo Oscuro Clínico */
+  --bg-main: #090d16;
+  --bg-card: #111827;
+  --bg-card-hover: #162032;
+  --bg-surface: #1e293b;
+  --border-subtle: #1f293d;
+  --border-focus: #0284c7;
+
+  /* Azul Clínico (Confianza y Acciones Primarias) */
+  --blue-clinical: #0ea5e9;
+  --blue-clinical-hover: #0284c7;
+  --blue-clinical-dark: #0369a1;
+  --blue-glow: rgba(14, 165, 233, 0.2);
+
+  /* Verde Salud ODS 3 (Sostenibilidad, Vigencia, Entregado) */
+  --green-health: #10b981;
+  --green-health-hover: #059669;
+  --green-health-light: #34d399;
+  --green-glow: rgba(16, 185, 129, 0.2);
+
+  /* Ámbar / Naranja Sanitario (Precaución, Pendiente, Advertencia) */
+  --amber-warning: #f59e0b;
+  --amber-warning-dark: #d97706;
+  --amber-bg: rgba(245, 158, 11, 0.1);
+  --amber-border: rgba(245, 158, 11, 0.35);
+
+  /* Rojo Alerta (Caducado / Bloqueo Sanitario) */
+  --red-alert: #ef4444;
+  --red-bg: rgba(239, 68, 68, 0.1);
+  --red-border: rgba(239, 68, 68, 0.35);
+
+  /* Tipografía y Textos */
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Clases de utilidad personalizadas para MediShare */
+.bg-medishare-dark {
+  background-color: var(--bg-main);
+}
+
+.bg-medishare-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+}
+
+.bg-medishare-card:hover {
+  border-color: rgba(14, 165, 233, 0.4);
+}
+
+.btn-clinical {
+  background-color: var(--blue-clinical);
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.65rem 1.4rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 14px var(--blue-glow);
+}
+
+.btn-clinical:hover {
+  background-color: var(--blue-clinical-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px var(--blue-glow);
+}
+
+.btn-clinical:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-health {
+  background-color: var(--green-health);
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.65rem 1.4rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 14px var(--green-glow);
+}
+
+.btn-health:hover {
+  background-color: var(--green-health-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px var(--green-glow);
+}
+
+.btn-health:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-secondary-outline {
+  background-color: transparent;
+  color: var(--text-primary);
+  border: 1px solid #334155;
+  font-weight: 600;
+  padding: 0.65rem 1.4rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-secondary-outline:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: #64748b;
+  transform: translateY(-1px);
+}
+
+/* Banners y Badges Sanitarios */
+.banner-amber-warning {
+  background-color: var(--amber-bg);
+  border: 1px solid var(--amber-border);
+  color: #fbbf24;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+}
+
+.badge-valid-green {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.badge-pending-amber {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.badge-review-blue {
+  background-color: rgba(14, 165, 233, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(14, 165, 233, 0.35);
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}

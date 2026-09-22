@@ -1,0 +1,251 @@
+import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { MedicationService } from '../../core/services/medication.service';
+
+@Component({
+  selector: 'app-landing',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  template: `
+    <div class="min-h-screen bg-[#080c14] text-slate-100 flex flex-col">
+      
+      <!-- HERO SECTION -->
+      <section class="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28 border-b border-slate-800/60">
+        <!-- Glows decorativos de fondo -->
+        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-sky-600/10 blur-[130px] pointer-events-none rounded-full"></div>
+        <div class="absolute top-1/3 right-1/4 w-[350px] h-[250px] bg-emerald-600/10 blur-[110px] pointer-events-none rounded-full"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+          
+          <!-- Badge ODS 3 -->
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-950/40 border border-emerald-800/60 text-emerald-300 text-xs font-semibold uppercase tracking-wider mb-6">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            ODS 3: Salud y Bienestar
+          </div>
+
+          <!-- Título Principal del Hero -->
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight sm:leading-none">
+            Tus medicamentos no utilizados <br class="hidden sm:inline" />
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-teal-300 to-emerald-400">
+              salvan vidas.
+            </span>
+          </h1>
+
+          <!-- Subtítulo Explicativo -->
+          <p class="mt-6 text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed font-normal">
+            Conectamos hogares con medicamentos excedentes y sellados a clínicas comunitarias y asociaciones acreditadas que combaten el desabastecimiento en comunidades vulnerables.
+          </p>
+
+          <!-- Botones de Acción (CTA) de alto contraste -->
+          <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
+            <a
+              routerLink="/donar"
+              class="w-full sm:w-auto btn-clinical text-base py-3.5 px-8 rounded-xl shadow-lg shadow-sky-500/25 font-bold flex items-center justify-center gap-2.5"
+            >
+              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              Quiero Donar
+            </a>
+
+            <a
+              routerLink="/catalogo"
+              class="w-full sm:w-auto btn-secondary-outline text-base py-3.5 px-7 rounded-xl font-semibold flex items-center justify-center gap-2.5 hover:border-sky-400/60"
+            >
+              <svg class="w-5 h-5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+              Soy una Clínica
+            </a>
+          </div>
+
+          <!-- Mini infografía de flujo: Donante -> Validación -> Clínica -->
+          <div class="mt-14 max-w-2xl mx-auto py-3 px-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-around text-xs text-slate-400">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+              <span class="font-medium text-slate-200">Ciudadano Donante</span>
+            </div>
+            <div class="flex items-center text-slate-600">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+              <span class="font-medium text-amber-300">Filtro Sanitario 90d</span>
+            </div>
+            <div class="flex items-center text-slate-600">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span class="font-medium text-emerald-300">Clínica Receptora</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- INDICADORES DE IMPACTO EN TIEMPO REAL -->
+      <section class="py-16 bg-[#0a0f1c] border-b border-slate-800/60">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div class="text-center sm:text-left mb-8 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div>
+              <span class="text-xs font-bold text-sky-400 uppercase tracking-wider">Métricas Comunitarias</span>
+              <h2 class="text-2xl font-bold text-white">Impacto en Tiempo Real</h2>
+            </div>
+            <span class="text-xs text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1 rounded-full flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              Actualizado hoy
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            
+            <!-- Card 1: Medicamentos Salvados -->
+            <div class="p-6 rounded-2xl bg-slate-900/90 border border-slate-800/90 hover:border-pink-500/40 transition-all group">
+              <div class="flex items-center justify-between">
+                <div class="w-12 h-12 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400 group-hover:scale-110 transition-transform">
+                  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-pink-400 bg-pink-950/40 border border-pink-800/40 px-2 py-0.5 rounded-full">+18% mes</span>
+              </div>
+              <p class="text-3xl font-extrabold text-white mt-4 tracking-tight">
+                {{ metrics().medicinesSaved | number }}
+              </p>
+              <h3 class="text-sm font-semibold text-slate-300 mt-1">Medicamentos Salvados</h3>
+              <p class="text-xs text-slate-500 mt-0.5">Unidades útiles no desechadas.</p>
+            </div>
+
+            <!-- Card 2: Clínicas Certificadas -->
+            <div class="p-6 rounded-2xl bg-slate-900/90 border border-slate-800/90 hover:border-sky-500/40 transition-all group">
+              <div class="flex items-center justify-between">
+                <div class="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 group-hover:scale-110 transition-transform">
+                  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-sky-400 bg-sky-950/40 border border-sky-800/40 px-2 py-0.5 rounded-full">Acreditadas</span>
+              </div>
+              <p class="text-3xl font-extrabold text-white mt-4 tracking-tight">
+                {{ metrics().certifiedClinics }}
+              </p>
+              <h3 class="text-sm font-semibold text-slate-300 mt-1">Clínicas Certificadas</h3>
+              <p class="text-xs text-slate-500 mt-0.5">Dispensarios y centros comunitarios.</p>
+            </div>
+
+            <!-- Card 3: Unidades Distribuidas -->
+            <div class="p-6 rounded-2xl bg-slate-900/90 border border-slate-800/90 hover:border-amber-500/40 transition-all group">
+              <div class="flex items-center justify-between">
+                <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-amber-400 bg-amber-950/40 border border-amber-800/40 px-2 py-0.5 rounded-full">Activo</span>
+              </div>
+              <p class="text-3xl font-extrabold text-white mt-4 tracking-tight">
+                {{ metrics().unitsDistributed | number }}
+              </p>
+              <h3 class="text-sm font-semibold text-slate-300 mt-1">Pacientes Beneficiados</h3>
+              <p class="text-xs text-slate-500 mt-0.5">Tratamientos completos entregados.</p>
+            </div>
+
+            <!-- Card 4: Tasa de Aprovechamiento -->
+            <div class="p-6 rounded-2xl bg-slate-900/90 border border-slate-800/90 hover:border-emerald-500/40 transition-all group">
+              <div class="flex items-center justify-between">
+                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                </div>
+                <span class="text-xs font-semibold text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-2 py-0.5 rounded-full">Alta Eficacia</span>
+              </div>
+              <p class="text-3xl font-extrabold text-white mt-4 tracking-tight">
+                {{ metrics().approvalRate }}%
+              </p>
+              <h3 class="text-sm font-semibold text-slate-300 mt-1">Tasa de Aprovechamiento</h3>
+              <p class="text-xs text-slate-500 mt-0.5">Cumplimiento de control sanitario.</p>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN ¿CÓMO FUNCIONA? (PASO A PASO) -->
+      <section class="py-20 bg-[#080c14]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div class="text-center max-w-2xl mx-auto mb-14">
+            <span class="text-xs font-bold text-sky-400 uppercase tracking-wider">Protocolo Sanitario Seguro</span>
+            <h2 class="text-3xl font-extrabold text-white mt-1">¿Cómo Funciona MediShare?</h2>
+            <p class="text-sm text-slate-400 mt-2">
+              Un proceso simple, riguroso y transparente para garantizar que cada fármaco llegue en perfectas condiciones a quienes más lo necesitan.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <!-- Paso 1 -->
+            <div class="relative p-7 rounded-2xl bg-slate-900/60 border border-slate-800 flex flex-col items-start hover:border-slate-700 transition-colors">
+              <div class="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 font-extrabold text-base flex items-center justify-center border border-sky-500/30 mb-5">
+                1
+              </div>
+              <h3 class="text-lg font-bold text-white mb-2">Registra tu Donación</h3>
+              <p class="text-sm text-slate-400 leading-relaxed">
+                Ingresa los datos del medicamento que ya no utilizas: nombre comercial, principio activo, número de lote y fecha de caducidad exacta.
+              </p>
+            </div>
+
+            <!-- Paso 2 -->
+            <div class="relative p-7 rounded-2xl bg-slate-900/60 border border-slate-800 flex flex-col items-start hover:border-slate-700 transition-colors">
+              <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 font-extrabold text-base flex items-center justify-center border border-amber-500/30 mb-5">
+                2
+              </div>
+              <h3 class="text-lg font-bold text-white mb-2">Validación Sanitaria</h3>
+              <p class="text-sm text-slate-400 leading-relaxed">
+                Nuestro sistema audita que el medicamento cuente con al menos 3 meses de vigencia y que el empaque conserve sus precintos de fábrica intactos.
+              </p>
+            </div>
+
+            <!-- Paso 3 -->
+            <div class="relative p-7 rounded-2xl bg-slate-900/60 border border-slate-800 flex flex-col items-start hover:border-slate-700 transition-colors">
+              <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 font-extrabold text-base flex items-center justify-center border border-emerald-500/30 mb-5">
+                3
+              </div>
+              <h3 class="text-lg font-bold text-white mb-2">Distribución Directa</h3>
+              <p class="text-sm text-slate-400 leading-relaxed">
+                Los fármacos aprobados entran al catálogo de clínicas comunitarias y son asignados de inmediato a pacientes con recetas médicas activas.
+              </p>
+            </div>
+
+          </div>
+
+          <!-- Banner CTA Inferior -->
+          <div class="mt-16 p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-sky-950/40 via-slate-900 to-emerald-950/30 border border-slate-800 text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div>
+              <h3 class="text-xl sm:text-2xl font-bold text-white">¿Tienes medicamentos sellados en casa?</h3>
+              <p class="text-sm text-slate-300 mt-1 max-w-xl">
+                Un botiquín con fármacos no utilizados puede ser la diferencia en el tratamiento de un paciente vulnerable.
+              </p>
+            </div>
+            <a
+              routerLink="/donar"
+              class="btn-clinical text-sm font-bold py-3 px-6 rounded-xl whitespace-nowrap shadow-lg shadow-sky-500/20"
+            >
+              Comenzar Donación
+            </a>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+  `,
+})
+export class LandingComponent {
+  private readonly medicationService = inject(MedicationService);
+  public readonly metrics = this.medicationService.metrics;
+}
