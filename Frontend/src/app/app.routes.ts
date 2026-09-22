@@ -77,6 +77,14 @@ export const routes: Routes = [
     title: 'Crear Cuenta | MediShare',
   },
   {
+    path: 'perfil',
+    loadComponent: () =>
+      import('./features/user-profile/user-profile.component').then(
+        (m) => m.UserProfileComponent
+      ),
+    title: 'Mi Perfil | MediShare',
+  },
+  {
     path: '**',
     redirectTo: '',
   },

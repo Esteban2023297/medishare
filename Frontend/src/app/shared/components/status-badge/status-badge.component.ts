@@ -6,15 +6,8 @@ import { DonationStatus, RequestStatus } from '../../../core/models/medication.m
   selector: 'app-status-badge',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <span
-      class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide border transition-colors"
-      [ngClass]="badgeClass"
-    >
-      <span class="w-1.5 h-1.5 rounded-full" [ngClass]="dotClass"></span>
-      {{ status }}
-    </span>
-  `,
+  templateUrl: './status-badge.component.html',
+  styleUrl: './status-badge.component.scss',
 })
 export class StatusBadgeComponent {
   @Input({ required: true }) status!: DonationStatus | RequestStatus | string;
