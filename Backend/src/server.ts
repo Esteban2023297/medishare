@@ -6,7 +6,6 @@ import { apiRouter } from './routes/api.routes';
 
 const app = express();
 
-// Middlewares globales
 app.use(
   cors({
     origin: '*', // Permitir solicitudes desde el frontend Angular (localhost:4200)
