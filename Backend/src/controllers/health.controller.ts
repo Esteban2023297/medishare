@@ -10,7 +10,7 @@ export async function getHealthStatus(req: Request, res: Response): Promise<void
     service: 'MediShare Backend API',
     version: '1.0.0',
     database: {
-      engine: 'PostgreSQL',
+      engine: 'MySQL',
       connected: dbStatus.connected,
       latencyMs: dbStatus.latencyMs,
       error: dbStatus.error,

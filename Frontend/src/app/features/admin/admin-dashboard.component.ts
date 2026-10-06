@@ -36,7 +36,7 @@ export class AdminDashboardComponent {
   public readonly requests = this.medicationService.requests;
   public readonly users = this.authService.users;
 
-  // Estado modales
+  // 1. Estado modales - MEDICAMENTOS
   public showMedicineModal = signal<boolean>(false);
   public isEditingMedicine = signal<boolean>(false);
   public editingMedicineId = signal<string | null>(null);
@@ -51,10 +51,45 @@ export class AdminDashboardComponent {
     isHighDemand: false,
   };
 
+  // 2. Estado modales - DONACIONES
+  public showDonationModal = signal<boolean>(false);
+  public isEditingDonation = signal<boolean>(false);
+  public editingDonationId = signal<string | null>(null);
+  public donationForm = {
+    commercialName: '',
+    activeIngredient: '',
+    presentation: 'Tabletas' as MedicinePresentation,
+    category: 'Analgésicos' as MedicineCategory,
+    units: 30,
+    batchNumber: 'LOT-2026',
+    expirationDate: '2027-06-30',
+    status: 'Pendiente' as DonationStatus,
+    donorName: 'María Rodríguez',
+    donorNotes: '',
+    targetClinic: '',
+  };
+
+  // 3. Estado modales - SOLICITUDES CLÍNICAS
+  public showRequestModal = signal<boolean>(false);
+  public isEditingRequest = signal<boolean>(false);
+  public editingRequestId = signal<string | null>(null);
+  public requestForm = {
+    clinicName: '',
+    activeIngredient: '',
+    presentation: 'Tabletas' as MedicinePresentation,
+    requestedUnits: 25,
+    urgency: 'Media' as 'Alta' | 'Media' | 'Baja',
+    status: 'Pendiente' as RequestStatus,
+  };
+
+  // 4. Estado modales - USUARIOS
   public showUserModal = signal<boolean>(false);
+  public isEditingUser = signal<boolean>(false);
+  public editingUserId = signal<string | null>(null);
   public userForm = {
     name: '',
     email: '',
+    password: '',
     role: 'usuario' as UserRole,
     institution: '',
     status: 'Activo' as 'Activo' | 'Inactivo' | 'Pendiente',
@@ -64,7 +99,9 @@ export class AdminDashboardComponent {
   public isTestingSql = signal<boolean>(false);
   public sqlTestResult = signal<string | null>(null);
 
-  // CRUD Medicamentos
+  // ==========================================
+  // CRUD MEDICAMENTOS
+  // ==========================================
   public openNewMedicineModal(): void {
     this.isEditingMedicine.set(false);
     this.editingMedicineId.set(null);
@@ -105,7 +142,58 @@ export class AdminDashboardComponent {
     }
   }
 
-  // CRUD Donaciones
+  // ==========================================
+  // CRUD DONACIONES
+  // ==========================================
+  public openNewDonationModal(): void {
+    this.isEditingDonation.set(false);
+    this.editingDonationId.set(null);
+    this.donationForm = {
+      commercialName: '',
+      activeIngredient: '',
+      presentation: 'Tabletas',
+      category: 'Analgésicos',
+      units: 30,
+      batchNumber: `LOT-${Math.floor(Math.random() * 900 + 100)}`,
+      expirationDate: '2027-06-30',
+      status: 'Pendiente',
+      donorName: 'María Rodríguez',
+      donorNotes: '',
+      targetClinic: '',
+    };
+    this.showDonationModal.set(true);
+  }
+
+  public editDonation(don: Donation): void {
+    this.isEditingDonation.set(true);
+    this.editingDonationId.set(don.id);
+    this.donationForm = {
+      commercialName: don.commercialName,
+      activeIngredient: don.activeIngredient,
+      presentation: don.presentation,
+      category: don.category,
+      units: don.units,
+      batchNumber: don.batchNumber,
+      expirationDate: don.expirationDate,
+      status: don.status,
+      donorName: don.donorName,
+      donorNotes: don.donorNotes || '',
+      targetClinic: don.targetClinic || '',
+    };
+    this.showDonationModal.set(true);
+  }
+
+  public saveDonation(): void {
+    if (!this.donationForm.commercialName || !this.donationForm.activeIngredient) return;
+
+    if (this.isEditingDonation() && this.editingDonationId()) {
+      this.medicationService.updateDonation(this.editingDonationId()!, this.donationForm);
+    } else {
+      this.medicationService.createDonationDirect(this.donationForm);
+    }
+    this.showDonationModal.set(false);
+  }
+
   public changeDonationStatus(id: string, status: DonationStatus): void {
     this.medicationService.updateDonationStatus(id, status);
   }
@@ -121,7 +209,48 @@ export class AdminDashboardComponent {
     }
   }
 
-  // CRUD Solicitudes
+  // ==========================================
+  // CRUD SOLICITUDES CLÍNICAS
+  // ==========================================
+  public openNewRequestModal(): void {
+    this.isEditingRequest.set(false);
+    this.editingRequestId.set(null);
+    this.requestForm = {
+      clinicName: '',
+      activeIngredient: '',
+      presentation: 'Tabletas',
+      requestedUnits: 25,
+      urgency: 'Media',
+      status: 'Pendiente',
+    };
+    this.showRequestModal.set(true);
+  }
+
+  public editRequest(req: MedicineRequest): void {
+    this.isEditingRequest.set(true);
+    this.editingRequestId.set(req.id);
+    this.requestForm = {
+      clinicName: req.clinicName,
+      activeIngredient: req.activeIngredient,
+      presentation: req.presentation,
+      requestedUnits: req.requestedUnits,
+      urgency: req.urgency,
+      status: req.status,
+    };
+    this.showRequestModal.set(true);
+  }
+
+  public saveRequest(): void {
+    if (!this.requestForm.clinicName || !this.requestForm.activeIngredient) return;
+
+    if (this.isEditingRequest() && this.editingRequestId()) {
+      this.medicationService.updateRequest(this.editingRequestId()!, this.requestForm);
+    } else {
+      this.medicationService.createRequestDirect(this.requestForm);
+    }
+    this.showRequestModal.set(false);
+  }
+
   public changeRequestStatus(id: string, status: RequestStatus): void {
     this.medicationService.updateRequest(id, { status });
   }
@@ -132,11 +261,16 @@ export class AdminDashboardComponent {
     }
   }
 
-  // CRUD Usuarios
+  // ==========================================
+  // CRUD USUARIOS
+  // ==========================================
   public openNewUserModal(): void {
+    this.isEditingUser.set(false);
+    this.editingUserId.set(null);
     this.userForm = {
       name: '',
       email: '',
+      password: '',
       role: 'usuario',
       institution: '',
       status: 'Activo',
@@ -144,9 +278,42 @@ export class AdminDashboardComponent {
     this.showUserModal.set(true);
   }
 
+  public editUser(user: User): void {
+    this.isEditingUser.set(true);
+    this.editingUserId.set(user.id);
+    this.userForm = {
+      name: user.name,
+      email: user.email,
+      password: '', // Vacía al inicio; si se ingresa, se actualizará
+      role: user.role,
+      institution: user.institution || '',
+      status: user.status,
+    };
+    this.showUserModal.set(true);
+  }
+
   public saveUser(): void {
     if (!this.userForm.name || !this.userForm.email) return;
-    this.authService.createUserByAdmin(this.userForm);
+
+    if (this.isEditingUser() && this.editingUserId()) {
+      const updatePayload: any = {
+        name: this.userForm.name,
+        email: this.userForm.email,
+        role: this.userForm.role,
+        institution: this.userForm.institution,
+        status: this.userForm.status,
+      };
+      if (this.userForm.password && this.userForm.password.trim()) {
+        updatePayload.password = this.userForm.password.trim();
+      }
+      this.authService.updateUser(this.editingUserId()!, updatePayload);
+    } else {
+      if (!this.userForm.password || !this.userForm.password.trim()) {
+        alert('Por favor introduce una contraseña para crear el usuario.');
+        return;
+      }
+      this.authService.createUserByAdmin(this.userForm);
+    }
     this.showUserModal.set(false);
   }
 
@@ -161,17 +328,29 @@ export class AdminDashboardComponent {
     }
   }
 
-  // SQL Operations
+  // ==========================================
+  // Operaciones SQL y Navegación
+  // ==========================================
   public async testSqlConnection(): Promise<void> {
     this.isTestingSql.set(true);
     this.sqlTestResult.set(null);
     const res = await this.sqlService.testConnection();
     this.isTestingSql.set(false);
-    this.sqlTestResult.set(`${res.message} (Latencia comprobada: ${res.latencyMs}ms).`);
+    this.sqlTestResult.set(`${res.message} (Latencia: ${res.latencyMs}ms).`);
   }
 
-  public syncSql(): void {
-    this.sqlService.syncDatabase();
-    alert('Sincronización completada con la base de datos SQL PostgreSQL.');
+  public async syncSql(): Promise<void> {
+    this.sqlTestResult.set(null);
+    const res = await this.sqlService.syncDatabase();
+    this.medicationService.loadAll();
+    this.authService.loadUsers();
+    this.sqlTestResult.set(res.message);
+  }
+
+  public goToTableTab(tableName: string): void {
+    if (tableName === 'medicamentos') this.activeTab.set('catalogo');
+    else if (tableName === 'donaciones') this.activeTab.set('donaciones');
+    else if (tableName === 'solicitudes_clinicas') this.activeTab.set('solicitudes');
+    else if (tableName === 'usuarios' || tableName === 'roles') this.activeTab.set('usuarios');
   }
 }

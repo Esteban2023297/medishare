@@ -22,11 +22,11 @@
       <div class="flex items-center gap-3">
         @if (currentUser()?.role === 'admin') {
           <a routerLink="/admin" class="btn-clinical text-xs !py-2 !px-4 !rounded-xl font-bold flex items-center gap-1.5 shadow-lg shadow-sky-500/20">
-            <span>🛡️</span> Panel Admin
+            Panel Admin
           </a>
         } @else {
           <a routerLink="/portal-usuario" class="btn-clinical text-xs !py-2 !px-4 !rounded-xl font-bold flex items-center gap-1.5 shadow-lg shadow-sky-500/20">
-            <span>👤</span> Mi Portal
+            Mi Portal
           </a>
         }
         <button
@@ -42,7 +42,6 @@
     <!-- MENSAJE DE ÉXITO -->
     @if (saveSuccess()) {
       <div class="p-4 rounded-2xl bg-emerald-950/40 border border-emerald-800/60 text-emerald-300 text-xs flex items-center gap-3 animate-fade-in">
-        <span class="text-base">✓</span>
         <span>Perfil actualizado correctamente en la red MediShare.</span>
       </div>
     }

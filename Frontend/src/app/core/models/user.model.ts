@@ -4,6 +4,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  password?: string;
   role: UserRole;
   institution?: string; // Para usuarios clínicos o institucionales
   status: 'Activo' | 'Inactivo' | 'Pendiente';

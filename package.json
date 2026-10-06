@@ -1,0 +1,14 @@
+{
+  "name": "medishare-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MediShare Monorepo Root",
+  "scripts": {
+    "panel": "pnpm --dir Backend panel",
+    "cli": "pnpm --dir Backend cli",
+    "backend": "pnpm --dir Backend dev",
+    "frontend": "pnpm --dir Frontend start",
+    "build:backend": "pnpm --dir Backend build",
+    "build:frontend": "pnpm --dir Frontend build"
+  }
+}

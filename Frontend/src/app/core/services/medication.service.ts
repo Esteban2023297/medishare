@@ -1,4 +1,5 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { ApiService } from './api.service';
 import {
   CatalogItem,
   Donation,
@@ -13,6 +14,8 @@ import {
   providedIn: 'root',
 })
 export class MedicationService {
+  private readonly apiService = inject(ApiService);
+
   // Lista de principios activos frecuentes para autocompletado inteligente
   public readonly commonActiveIngredients: string[] = [
     'Amoxicilina 500mg',
@@ -42,183 +45,20 @@ export class MedicationService {
     medicinesSaved: 12480,
     certifiedClinics: 38,
     unitsDistributed: 4210,
-    approvalRate: 97,
+    approvalRate: 98,
   });
   public readonly metrics = this._metrics.asReadonly();
 
   // Catálogo de medicamentos disponibles para clínicas
-  private readonly _catalog = signal<CatalogItem[]>([
-    {
-      id: 'CAT-001',
-      activeIngredient: 'Amoxicilina',
-      commercialName: 'Amoxil / Genfar',
-      presentation: 'Cápsulas',
-      category: 'Antibióticos',
-      availableUnits: 240,
-      minExpirationDate: '2026-11-30',
-      isHighDemand: false,
-      batchNumber: 'AB-2024-001',
-      location: 'Centro de Acopio Norte',
-    },
-    {
-      id: 'CAT-002',
-      activeIngredient: 'Metformina',
-      commercialName: 'Glucophage 850mg',
-      presentation: 'Tabletas',
-      category: 'Diabetes',
-      availableUnits: 85,
-      minExpirationDate: '2027-01-15',
-      isHighDemand: true,
-      batchNumber: 'MET-850-99',
-      location: 'Dispensario Central',
-    },
-    {
-      id: 'CAT-003',
-      activeIngredient: 'Enalapril',
-      commercialName: 'Renitec 10mg',
-      presentation: 'Tabletas',
-      category: 'Cardio',
-      availableUnits: 160,
-      minExpirationDate: '2026-07-20',
-      isHighDemand: false,
-      batchNumber: 'ENL-10-54',
-      location: 'Clínica San Gabriel',
-    },
-    {
-      id: 'CAT-004',
-      activeIngredient: 'Omeprazol',
-      commercialName: 'Losec 20mg',
-      presentation: 'Cápsulas',
-      category: 'Gastrointestinal',
-      availableUnits: 312,
-      minExpirationDate: '2027-05-10',
-      isHighDemand: false,
-      batchNumber: 'OMP-20-41',
-      location: 'Centro de Acopio Norte',
-    },
-    {
-      id: 'CAT-005',
-      activeIngredient: 'Paracetamol',
-      commercialName: 'Tylenol / Genérico',
-      presentation: 'Tabletas',
-      category: 'Analgésicos',
-      availableUnits: 450,
-      minExpirationDate: '2027-08-30',
-      isHighDemand: false,
-      batchNumber: 'PAR-500-11',
-      location: 'Dispensario Central',
-    },
-    {
-      id: 'CAT-006',
-      activeIngredient: 'Salbutamol',
-      commercialName: 'Ventolin Inhalador 100mcg',
-      presentation: 'Inhalador',
-      category: 'Respiratorio',
-      availableUnits: 42,
-      minExpirationDate: '2026-10-15',
-      isHighDemand: true,
-      batchNumber: 'SLB-100-88',
-      location: 'Clínica San Gabriel',
-    },
-  ]);
+  private readonly _catalog = signal<CatalogItem[]>([]);
   public readonly catalog = this._catalog.asReadonly();
 
   // Registro de donaciones realizadas por ciudadanos
-  private readonly _donations = signal<Donation[]>([
-    {
-      id: 'DON-001',
-      commercialName: 'Amoxil 500mg',
-      activeIngredient: 'Amoxicilina',
-      category: 'Antibióticos',
-      presentation: 'Cápsulas',
-      batchNumber: 'AB-2024-001',
-      units: 120,
-      expirationDate: '2026-11-30',
-      status: 'Entregado',
-      donorName: 'María Rodríguez',
-      donorNotes: 'Empaque original sellado, guardado en lugar seco.',
-      targetClinic: 'Clínica Comunitaria Esperanza',
-      createdAt: '2026-08-15',
-    },
-    {
-      id: 'DON-002',
-      commercialName: 'Glucophage 850mg',
-      activeIngredient: 'Metformina',
-      category: 'Diabetes',
-      presentation: 'Tabletas',
-      batchNumber: 'MET-850-99',
-      units: 60,
-      expirationDate: '2027-01-15',
-      status: 'Aprobado',
-      donorName: 'María Rodríguez',
-      donorNotes: 'Sobrante de tratamiento finalizado.',
-      targetClinic: 'Dispensario San José',
-      createdAt: '2026-08-28',
-    },
-    {
-      id: 'DON-003',
-      commercialName: 'Advil 400mg',
-      activeIngredient: 'Ibuprofeno',
-      category: 'Analgésicos',
-      presentation: 'Tabletas',
-      batchNumber: 'IBU-400-22',
-      units: 30,
-      expirationDate: '2026-12-05',
-      status: 'Pendiente',
-      donorName: 'María Rodríguez',
-      donorNotes: 'Blíster intacto con sello de seguridad.',
-      createdAt: '2026-09-02',
-    },
-    {
-      id: 'DON-004',
-      commercialName: 'Losec 20mg',
-      activeIngredient: 'Omeprazol',
-      category: 'Gastrointestinal',
-      presentation: 'Cápsulas',
-      batchNumber: 'OMP-20-41',
-      units: 40,
-      expirationDate: '2027-05-10',
-      status: 'En revisión',
-      donorName: 'María Rodríguez',
-      donorNotes: 'Caja con 2 blísters sellados.',
-      createdAt: '2026-09-07',
-    },
-  ]);
+  private readonly _donations = signal<Donation[]>([]);
   public readonly donations = this._donations.asReadonly();
 
   // Registro de solicitudes hechas por clínicas comunitarias
-  private readonly _requests = signal<MedicineRequest[]>([
-    {
-      id: 'SOL-101',
-      clinicName: 'Clínica Esperanza',
-      activeIngredient: 'Amoxicilina',
-      presentation: 'Cápsulas',
-      requestedUnits: 60,
-      requestDate: '2026-09-05',
-      urgency: 'Alta',
-      status: 'Aprobada',
-    },
-    {
-      id: 'SOL-102',
-      clinicName: 'Dispensario Comunitario San José',
-      activeIngredient: 'Metformina',
-      presentation: 'Tabletas',
-      requestedUnits: 40,
-      requestDate: '2026-09-06',
-      urgency: 'Media',
-      status: 'En camino',
-    },
-    {
-      id: 'SOL-103',
-      clinicName: 'Asociación Salud Para Todos',
-      activeIngredient: 'Salbutamol',
-      presentation: 'Inhalador',
-      requestedUnits: 15,
-      requestDate: '2026-09-08',
-      urgency: 'Alta',
-      status: 'Pendiente',
-    },
-  ]);
+  private readonly _requests = signal<MedicineRequest[]>([]);
   public readonly requests = this._requests.asReadonly();
 
   // Filtros reactivos de búsqueda para el catálogo
@@ -229,20 +69,69 @@ export class MedicationService {
   public readonly filteredCatalog = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
     const category = this.selectedCategory();
+    const norm = (s: string) => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const catNorm = norm(category);
 
     return this._catalog().filter((item) => {
       const matchesCategory =
-        category === 'Todos' || item.category === category;
+        category === 'Todos' ||
+        norm(item.category) === catNorm ||
+        (catNorm.length >= 4 && norm(item.category).includes(catNorm.slice(0, 5)));
       const matchesSearch =
         !query ||
-        item.activeIngredient.toLowerCase().includes(query) ||
-        item.commercialName.toLowerCase().includes(query);
+        norm(item.activeIngredient).includes(norm(query)) ||
+        norm(item.commercialName).includes(norm(query));
 
       return matchesCategory && matchesSearch;
     });
   });
 
-  // Métodos de negocio
+  constructor() {
+    this.loadAll();
+  }
+
+  /**
+   * Carga todos los datos reales desde la base de datos MySQL a través de la API
+   */
+  public loadAll(): void {
+    this.apiService.get<{ medicines: CatalogItem[] }>('/medicines').subscribe({
+      next: (res) => {
+        if (res?.medicines) {
+          this._catalog.set(res.medicines);
+        }
+      },
+      error: (err) => console.warn('Error cargando medicamentos desde MySQL:', err),
+    });
+
+    this.apiService.get<{ donations: Donation[] }>('/donations').subscribe({
+      next: (res) => {
+        if (res?.donations) {
+          this._donations.set(res.donations);
+        }
+      },
+      error: (err) => console.warn('Error cargando donaciones desde MySQL:', err),
+    });
+
+    this.apiService.get<{ requests: MedicineRequest[] }>('/requests').subscribe({
+      next: (res) => {
+        if (res?.requests) {
+          this._requests.set(res.requests);
+        }
+      },
+      error: (err) => console.warn('Error cargando solicitudes desde MySQL:', err),
+    });
+
+    this.apiService.get<{ metrics: ImpactMetrics }>('/metrics').subscribe({
+      next: (res) => {
+        if (res?.metrics) {
+          this._metrics.set(res.metrics);
+        }
+      },
+      error: (err) => console.warn('Error cargando métricas desde MySQL:', err),
+    });
+  }
+
+  // Métodos de filtros
   public setSearchQuery(query: string): void {
     this.searchQuery.set(query);
   }
@@ -252,7 +141,7 @@ export class MedicationService {
   }
 
   /**
-   * Registra una nueva donación garantizando la trazabilidad.
+   * Registra una nueva donación garantizando trazabilidad y persistencia en MySQL
    */
   public registerDonation(
     donationData: Omit<Donation, 'id' | 'createdAt' | 'status'>
@@ -268,20 +157,30 @@ export class MedicationService {
       createdAt: today,
     };
 
-    // Actualizamos lista de donaciones
+    // Actualización reactiva inmediata
     this._donations.update((prev) => [newDonation, ...prev]);
-
-    // Actualizamos métricas de impacto
     this._metrics.update((m) => ({
       ...m,
       medicinesSaved: m.medicinesSaved + newDonation.units,
     }));
 
+    // Persistencia HTTP en MySQL
+    this.apiService.post<{ donation: Donation }>('/donations', donationData).subscribe({
+      next: (res) => {
+        if (res?.donation) {
+          this._donations.update((prev) =>
+            prev.map((d) => (d.id === formattedId ? res.donation : d))
+          );
+        }
+      },
+      error: (err) => console.error('Error al persistir donación en MySQL:', err),
+    });
+
     return newDonation;
   }
 
   /**
-   * Permite a una clínica solicitar unidades de un fármaco del catálogo.
+   * Permite a una clínica solicitar unidades de un fármaco del catálogo
    */
   public requestMedicine(
     catalogItemId: string,
@@ -310,7 +209,6 @@ export class MedicationService {
       )
     );
 
-    // Registrar solicitud
     const nextReqNumber = this._requests().length + 101;
     const newRequest: MedicineRequest = {
       id: `SOL-${nextReqNumber}`,
@@ -324,12 +222,29 @@ export class MedicationService {
     };
 
     this._requests.update((prev) => [newRequest, ...prev]);
-
-    // Actualizar métricas
     this._metrics.update((m) => ({
       ...m,
       unitsDistributed: m.unitsDistributed + units,
     }));
+
+    // Persistencia HTTP en MySQL
+    this.apiService.post<{ request: MedicineRequest }>('/requests', {
+      catalogItemId,
+      clinicName,
+      requestedUnits: units,
+      urgency,
+      activeIngredient: item.activeIngredient,
+      presentation: item.presentation,
+    }).subscribe({
+      next: (res) => {
+        if (res?.request) {
+          this._requests.update((prev) =>
+            prev.map((r) => (r.id === newRequest.id ? res.request : r))
+          );
+        }
+      },
+      error: (err) => console.error('Error persistiendo solicitud clínica en MySQL:', err),
+    });
 
     return {
       success: true,
@@ -337,13 +252,14 @@ export class MedicationService {
     };
   }
 
-  /**
-   * Actualiza el estado de una donación (auditoría / trazabilidad).
-   */
   public updateDonationStatus(donationId: string, newStatus: DonationStatus): void {
     this._donations.update((prev) =>
       prev.map((d) => (d.id === donationId ? { ...d, status: newStatus } : d))
     );
+
+    this.apiService.put(`/donations/${donationId}`, { status: newStatus }).subscribe({
+      error: (err) => console.error('Error al actualizar estado de donación en MySQL:', err),
+    });
   }
 
   // ==========================================
@@ -356,6 +272,18 @@ export class MedicationService {
       id: nextId,
     };
     this._catalog.update((prev) => [newItem, ...prev]);
+
+    this.apiService.post<{ medicine: CatalogItem }>('/medicines', itemData).subscribe({
+      next: (res) => {
+        if (res?.medicine) {
+          this._catalog.update((prev) =>
+            prev.map((m) => (m.id === nextId ? res.medicine : m))
+          );
+        }
+      },
+      error: (err) => console.error('Error guardando medicamento en MySQL:', err),
+    });
+
     return newItem;
   }
 
@@ -363,23 +291,62 @@ export class MedicationService {
     this._catalog.update((prev) =>
       prev.map((c) => (c.id === id ? { ...c, ...updatedData } : c))
     );
+
+    this.apiService.put(`/medicines/${id}`, updatedData).subscribe({
+      error: (err) => console.error('Error actualizando medicamento en MySQL:', err),
+    });
   }
 
   public deleteCatalogItem(id: string): void {
     this._catalog.update((prev) => prev.filter((c) => c.id !== id));
+
+    this.apiService.delete(`/medicines/${id}`).subscribe({
+      error: (err) => console.error('Error eliminando medicamento en MySQL:', err),
+    });
   }
 
   // ==========================================
   // OPERACIONES CRUD DE DONACIONES (ADMIN)
   // ==========================================
+  public createDonationDirect(donationData: Omit<Donation, 'id' | 'createdAt'>): Donation {
+    const nextId = `DON-${(this._donations().length + 1).toString().padStart(3, '0')}`;
+    const newDon: Donation = {
+      ...donationData,
+      id: nextId,
+      createdAt: new Date().toISOString().split('T')[0],
+    };
+    this._donations.update((prev) => [newDon, ...prev]);
+
+    this.apiService.post<{ donation: Donation }>('/donations', donationData).subscribe({
+      next: (res) => {
+        if (res?.donation) {
+          this._donations.update((prev) =>
+            prev.map((d) => (d.id === nextId ? res.donation : d))
+          );
+        }
+      },
+      error: (err) => console.error('Error guardando donación en MySQL:', err),
+    });
+
+    return newDon;
+  }
+
   public updateDonation(id: string, updatedData: Partial<Donation>): void {
     this._donations.update((prev) =>
       prev.map((d) => (d.id === id ? { ...d, ...updatedData } : d))
     );
+
+    this.apiService.put(`/donations/${id}`, updatedData).subscribe({
+      error: (err) => console.error('Error actualizando donación en MySQL:', err),
+    });
   }
 
   public deleteDonation(id: string): void {
     this._donations.update((prev) => prev.filter((d) => d.id !== id));
+
+    this.apiService.delete(`/donations/${id}`).subscribe({
+      error: (err) => console.error('Error eliminando donación en MySQL:', err),
+    });
   }
 
   // ==========================================
@@ -393,6 +360,18 @@ export class MedicationService {
       requestDate: new Date().toISOString().split('T')[0],
     };
     this._requests.update((prev) => [newReq, ...prev]);
+
+    this.apiService.post<{ request: MedicineRequest }>('/requests', requestData).subscribe({
+      next: (res) => {
+        if (res?.request) {
+          this._requests.update((prev) =>
+            prev.map((r) => (r.id === nextId ? res.request : r))
+          );
+        }
+      },
+      error: (err) => console.error('Error guardando solicitud en MySQL:', err),
+    });
+
     return newReq;
   }
 
@@ -400,10 +379,17 @@ export class MedicationService {
     this._requests.update((prev) =>
       prev.map((r) => (r.id === id ? { ...r, ...updatedData } : r))
     );
+
+    this.apiService.put(`/requests/${id}`, updatedData).subscribe({
+      error: (err) => console.error('Error actualizando solicitud en MySQL:', err),
+    });
   }
 
   public deleteRequest(id: string): void {
     this._requests.update((prev) => prev.filter((r) => r.id !== id));
+
+    this.apiService.delete(`/requests/${id}`).subscribe({
+      error: (err) => console.error('Error eliminando solicitud en MySQL:', err),
+    });
   }
 }
-

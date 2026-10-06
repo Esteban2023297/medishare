@@ -1,11 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.validateSanitaryExpiration = validateSanitaryExpiration;
-/**
- * Middleware Sanitario de MediShare:
- * Bloquea en el servidor cualquier registro de medicamento con fecha de caducidad
- * inferior a 90 días (3 meses) respecto a la fecha actual.
- */
 function validateSanitaryExpiration(req, res, next) {
     const { expirationDate } = req.body;
     if (!expirationDate) {

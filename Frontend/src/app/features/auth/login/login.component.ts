@@ -21,27 +21,13 @@ export class LoginComponent {
 
   public loginForm: FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)]],
-    password: ['123456', [Validators.required, Validators.minLength(6)]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
   get email() { return this.loginForm.get('email'); }
   get password() { return this.loginForm.get('password'); }
 
-  public fillDemo(role: 'admin' | 'usuario'): void {
-    if (role === 'admin') {
-      this.loginForm.patchValue({
-        email: 'admin@medishare.org',
-        password: 'adminpassword',
-      });
-    } else {
-      this.loginForm.patchValue({
-        email: 'maria@gmail.com',
-        password: 'userpassword',
-      });
-    }
-  }
-
-  public onSubmit(): void {
+  public async onSubmit(): Promise<void> {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
@@ -50,21 +36,21 @@ export class LoginComponent {
     this.isLoggingIn.set(true);
     this.errorMessage.set(null);
 
-    setTimeout(() => {
-      const email = this.loginForm.value.email;
-      const res = this.authService.login({ email });
+    const email = this.loginForm.value.email;
+    const password = this.loginForm.value.password;
 
-      this.isLoggingIn.set(false);
+    const res = await this.authService.login({ email, password });
 
-      if (res.success && res.user) {
-        if (res.user.role === 'admin') {
-          this.router.navigate(['/admin']);
-        } else {
-          this.router.navigate(['/portal-usuario']);
-        }
+    this.isLoggingIn.set(false);
+
+    if (res.success && res.user) {
+      if (res.user.role === 'admin') {
+        this.router.navigate(['/admin']);
       } else {
-        this.errorMessage.set(res.message);
+        this.router.navigate(['/portal-usuario']);
       }
-    }, 450);
+    } else {
+      this.errorMessage.set(res.message);
+    }
   }
 }
