@@ -1,144 +1,153 @@
 -- ============================================================================
--- ESQUEMA RELACIONAL SQL PARA MEDISHARE (PostgreSQL 14+)
--- Red Sanitaria y Comunitaria de Donación de Medicamentos
--- Cumplimiento de integridad referencial, roles y barrera sanitaria de 90 días
+-- esquema relacional sql ampliado para medishare (mysql / mariadb)
 -- ============================================================================
 
--- 1. EXTENSIONES Y TIPOS ENUMERADOS
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+create database if not exists medishare_In5bm;
+use medishare_In5bm;
 
-DO $$ BEGIN
-    CREATE TYPE user_role AS ENUM ('admin', 'usuario');
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
+-- desactivar temporalmente restricciones de llaves foraneas para recrear tablas limpiamente
+set foreign_key_checks = 0;
 
-DO $$ BEGIN
-    CREATE TYPE donation_status AS ENUM ('Pendiente', 'Aprobado', 'Entregado', 'En revisión', 'Rechazado');
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
+drop table if exists solicitudes_clinicas;
+drop table if exists donaciones;
+drop table if exists medicamentos;
+drop table if exists usuarios;
+drop table if exists roles;
 
-DO $$ BEGIN
-    CREATE TYPE request_status AS ENUM ('Pendiente', 'Aprobada', 'En camino', 'Entregada');
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
+set foreign_key_checks = 1;
 
-DO $$ BEGIN
-    CREATE TYPE urgency_level AS ENUM ('Alta', 'Media', 'Baja');
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
-
--- 2. TABLA DE USUARIOS Y ROLES (ADMIN / USUARIO)
-CREATE TABLE IF NOT EXISTS users (
-    id VARCHAR(36) PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name VARCHAR(150) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    role user_role NOT NULL DEFAULT 'usuario',
-    institution VARCHAR(200),
-    status VARCHAR(20) NOT NULL DEFAULT 'Activo' CHECK (status IN ('Activo', 'Inactivo', 'Suspendido')),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+-- 1. tabla de roles
+create table roles (
+    id_rol int auto_increment primary key,
+    nombre_rol varchar(50) not null
 );
 
--- 3. TABLA DE CATEGORÍAS TERAPÉUTICAS
-CREATE TABLE IF NOT EXISTS categories (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) UNIQUE NOT NULL,
-    description TEXT
+-- 2. tabla de usuarios
+create table usuarios (
+    id_usuario int auto_increment primary key,
+    nombre varchar(100) not null,
+    correo varchar(100) unique not null,
+    contrasena varchar(255) not null,
+    id_rol int,
+    fecha_registro timestamp default current_timestamp,
+    foreign key (id_rol) references roles(id_rol)
 );
 
--- 4. TABLA DE CATÁLOGO E INVENTARIO DE MEDICAMENTOS (FÁRMACOS DISPONIBLES)
-CREATE TABLE IF NOT EXISTS medicines (
-    id VARCHAR(36) PRIMARY KEY DEFAULT uuid_generate_v4(),
-    code VARCHAR(20) UNIQUE NOT NULL, -- Ej: CAT-001
-    active_ingredient VARCHAR(200) NOT NULL,
-    commercial_name VARCHAR(200) NOT NULL,
-    presentation VARCHAR(50) NOT NULL,
-    category_id INT REFERENCES categories(id) ON DELETE SET NULL,
-    available_units INT NOT NULL DEFAULT 0 CHECK (available_units >= 0),
-    min_expiration_date DATE NOT NULL,
-    is_high_demand BOOLEAN NOT NULL DEFAULT FALSE,
-    batch_number VARCHAR(50) NOT NULL,
-    location VARCHAR(150) DEFAULT 'Centro de Acopio Central',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+-- 3. tabla de medicamentos
+create table medicamentos (
+    id_medicamento int auto_increment primary key,
+    nombre_comercial varchar(150) not null,
+    principio_activo varchar(150) not null,
+    presentacion varchar(50) not null,
+    categoria varchar(50) not null,
+    stock_total int default 0,
+    estado varchar(20) default 'en linea'
 );
 
--- 5. TABLA DE DONACIONES (CON RESTRICCIÓN SANITARIA DE CADUCIDAD >= 90 DÍAS)
-CREATE TABLE IF NOT EXISTS donations (
-    id VARCHAR(36) PRIMARY KEY DEFAULT uuid_generate_v4(),
-    code VARCHAR(20) UNIQUE NOT NULL, -- Ej: DON-001
-    donor_id VARCHAR(36) REFERENCES users(id) ON DELETE RESTRICT,
-    commercial_name VARCHAR(200) NOT NULL,
-    active_ingredient VARCHAR(200) NOT NULL,
-    category_id INT REFERENCES categories(id) ON DELETE SET NULL,
-    presentation VARCHAR(50) NOT NULL,
-    batch_number VARCHAR(50) NOT NULL,
-    units INT NOT NULL CHECK (units > 0),
-    expiration_date DATE NOT NULL,
-    status donation_status NOT NULL DEFAULT 'Pendiente',
-    target_clinic_id VARCHAR(36) REFERENCES users(id) ON DELETE SET NULL,
-    donor_notes TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    
-    -- Restricción de seguridad sanitaria:
-    -- La caducidad debe ser al menos 90 días posterior a la fecha de registro
-    CONSTRAINT chk_sanitary_expiration_rule CHECK (expiration_date >= (created_at::date + INTERVAL '90 days'))
+-- 4. tabla de donaciones
+create table donaciones (
+    id_donacion int auto_increment primary key,
+    id_usuario int,
+    id_medicamento int,
+    numero_lote varchar(50) not null,
+    cantidad_unidades int not null,
+    fecha_caducidad date not null,
+    observaciones text,
+    estado_tramite varchar(30) default 'pendiente',
+    fecha_donacion timestamp default current_timestamp,
+    foreign key (id_usuario) references usuarios(id_usuario),
+    foreign key (id_medicamento) references medicamentos(id_medicamento)
 );
 
--- 6. TABLA DE SOLICITUDES DE CLÍNICAS Y ASOCIACIONES
-CREATE TABLE IF NOT EXISTS clinic_requests (
-    id VARCHAR(36) PRIMARY KEY DEFAULT uuid_generate_v4(),
-    code VARCHAR(20) UNIQUE NOT NULL, -- Ej: SOL-101
-    clinic_id VARCHAR(36) REFERENCES users(id) ON DELETE RESTRICT,
-    medicine_id VARCHAR(36) REFERENCES medicines(id) ON DELETE RESTRICT,
-    requested_units INT NOT NULL CHECK (requested_units > 0),
-    urgency urgency_level NOT NULL DEFAULT 'Media',
-    status request_status NOT NULL DEFAULT 'Pendiente',
-    request_date DATE NOT NULL DEFAULT CURRENT_DATE,
-    delivered_at TIMESTAMP WITH TIME ZONE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+-- 5. tabla de solicitudes clinicas
+create table solicitudes_clinicas (
+    id_solicitud int auto_increment primary key,
+    id_clinica int,
+    id_medicamento int,
+    cantidad_solicitada int not null,
+    estado_solicitud varchar(30) default 'pendiente',
+    fecha_solicitud timestamp default current_timestamp,
+    foreign key (id_clinica) references usuarios(id_usuario),
+    foreign key (id_medicamento) references medicamentos(id_medicamento)
 );
-
--- 7. TABLA DE AUDITORÍA Y TRAZABILIDAD SANITARIA
-CREATE TABLE IF NOT EXISTS audit_logs (
-    id BIGSERIAL PRIMARY KEY,
-    event_type VARCHAR(50) NOT NULL, -- 'DONATION_REGISTERED', 'STATUS_APPROVED', 'STOCK_DEDUCTED'
-    entity_name VARCHAR(50) NOT NULL,
-    entity_id VARCHAR(50) NOT NULL,
-    actor_id VARCHAR(36) REFERENCES users(id) ON DELETE SET NULL,
-    details JSONB,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- 8. ÍNDICES DE RENDIMIENTO PARA FILTROS CLÍNICOS
-CREATE INDEX IF NOT EXISTS idx_medicines_active_ingredient ON medicines(LOWER(active_ingredient));
-CREATE INDEX IF NOT EXISTS idx_medicines_expiration ON medicines(min_expiration_date);
-CREATE INDEX IF NOT EXISTS idx_donations_donor ON donations(donor_id);
-CREATE INDEX IF NOT EXISTS idx_donations_status ON donations(status);
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(LOWER(email));
 
 -- ============================================================================
--- DATOS SEMILLA INICIALES (SEED DATA)
+-- datos semilla ampliados (seed data - mas del triple de registros)
 -- ============================================================================
 
--- Categorías
-INSERT INTO categories (name, description) VALUES
-('Antibióticos', 'Fármacos para el tratamiento de infecciones bacterianas'),
-('Diabetes', 'Hipoglucemiantes orales e insulinas'),
-('Cardio', 'Antihipertensivos y protectores vasculares'),
-('Analgésicos', 'Alivio del dolor e inflamación'),
-('Respiratorio', 'Broncodilatadores y antiasmáticos'),
-('Gastrointestinal', 'Antiácidos e inhibidores de bomba de protones')
-ON CONFLICT (name) DO NOTHING;
+insert into roles (nombre_rol) values 
+('donante'), 
+('clinica'), 
+('administrador');
 
--- Usuarios de prueba (Admin y Usuario)
-INSERT INTO users (id, name, email, password_hash, role, institution, status) VALUES
-('u0000001-0000-0000-0000-000000000001', 'Dr. Alejandro Morales', 'admin@medishare.org', '$2a$12$e8Y54...hash', 'admin', 'MediShare Central', 'Activo'),
-('u0000002-0000-0000-0000-000000000002', 'María Rodríguez', 'maria@gmail.com', '$2a$12$e8Y54...hash', 'usuario', 'Donante Particular', 'Activo'),
-('u0000003-0000-0000-0000-000000000003', 'Clínica Comunitaria Esperanza', 'contacto@clinicaesperanza.org', '$2a$12$e8Y54...hash', 'usuario', 'Clínica Esperanza', 'Activo')
-ON CONFLICT (email) DO NOTHING;
+-- usuarios originales (conservados tal cual se solicito)
+insert into usuarios (nombre, correo, contrasena, id_rol) values 
+('carlos mendoza', 'carlos@email.com', '123456', 1),
+('laura gomez', 'laura@email.com', '123456', 1),
+('clinica esperanza', 'contacto@esperanza.com', '123456', 2),
+('hospital central', 'admin@hospital.com', '123456', 2),
+('sofia ruiz', 'sofia@email.com', '123456', 1),
+('admin general', 'admin@medishare.com', '123456', 3);
+
+-- medicamentos ampliados (mas del triple: 18 registros)
+insert into medicamentos (nombre_comercial, principio_activo, presentacion, categoria, stock_total, estado) values 
+('amoxicilina genfar 500mg', 'amoxicilina', 'capsulas 500mg', 'antibioticos', 240, 'en linea'),
+('metformina 850mg', 'metformina', 'tabletas 850mg', 'diabetes', 85, 'alta demanda'),
+('enalapril 10mg', 'enalapril', 'tabletas 10mg', 'cardio', 160, 'en linea'),
+('omeprazol 20mg', 'omeprazol', 'capsulas 20mg', 'analgesicos', 312, 'en linea'),
+('ibuprofeno 400mg', 'ibuprofeno', 'tabletas 400mg', 'analgesicos', 120, 'en linea'),
+('paracetamol 500mg', 'paracetamol', 'tabletas 500mg', 'analgesicos', 200, 'en linea'),
+('loratadina 10mg', 'loratadina', 'tabletas 10mg', 'antihistaminicos', 150, 'en linea'),
+('losartan 50mg', 'losartan', 'tabletas 50mg', 'cardio', 95, 'en linea'),
+('diclofenaco 50mg', 'diclofenaco', 'tabletas 50mg', 'analgesicos', 180, 'en linea'),
+('azitromicina 500mg', 'azitromicina', 'tabletas 500mg', 'antibioticos', 110, 'alta demanda'),
+('salbutamol inhalador', 'salbutamol', 'spray 100mcg', 'respiratorio', 75, 'en linea'),
+('aspirina 100mg', 'acido acetilsalicilico', 'tabletas 100mg', 'cardio', 220, 'en linea'),
+('glibenclamida 5mg', 'glibenclamida', 'tabletas 5mg', 'diabetes', 130, 'en linea'),
+('hidroclorotiazida 25mg', 'hidroclorotiazida', 'tabletas 25mg', 'cardio', 90, 'en linea'),
+('fluconazol 150mg', 'fluconazol', 'capsulas 150mg', 'antimicoticos', 65, 'en linea'),
+('naproxeno 500mg', 'naproxeno', 'tabletas 500mg', 'analgesicos', 140, 'en linea'),
+('cetirizina 10mg', 'cetirizina', 'tabletas 10mg', 'antihistaminicos', 210, 'en linea'),
+('insulina nph 100ui', 'insulina isofana', 'frasco 10ml', 'diabetes', 50, 'alta demanda');
+
+-- donaciones ampliadas (mas del triple: 18 registros)
+insert into donaciones (id_usuario, id_medicamento, numero_lote, cantidad_unidades, fecha_caducidad, observaciones, estado_tramite) values 
+(1, 1, 'ab-2024-001', 30, '2026-03-31', 'empaque sellado y en buenas condiciones', 'aprobado'),
+(2, 2, 'mt-2024-002', 45, '2026-01-15', 'caja original sin alteraciones', 'pendiente'),
+(5, 3, 'en-2024-003', 50, '2026-07-20', 'excelente estado de almacenamiento', 'en revision'),
+(1, 4, 'om-2024-004', 60, '2026-05-10', 'nuevo y sellado', 'entregado'),
+(2, 5, 'ib-2024-005', 40, '2026-09-01', 'vigencia correcta', 'pendiente'),
+(5, 6, 'pr-2024-006', 75, '2026-11-30', 'sin abrir', 'aprobado'),
+(1, 7, 'lr-2024-007', 25, '2026-08-14', 'caja en perfecto estado', 'aprobado'),
+(2, 8, 'ls-2024-008', 35, '2026-10-05', 'lote verificado', 'pendiente'),
+(5, 9, 'dc-2024-009', 50, '2026-04-22', 'sellado de fabrica', 'en revision'),
+(1, 10, 'az-2024-010', 20, '2026-12-01', 'caducidad amplia', 'aprobado'),
+(2, 11, 'sb-2024-011', 15, '2026-06-18', 'inhalador nuevo', 'entregado'),
+(5, 12, 'as-2024-012', 60, '2027-01-10', 'conservado en lugar fresco', 'aprobado'),
+(1, 13, 'gl-2024-013', 30, '2026-02-28', 'sin danos aparentes', 'pendiente'),
+(2, 14, 'hd-2024-014', 45, '2026-09-15', 'etiqueta legible', 'aprobado'),
+(5, 15, 'fl-2024-015', 25, '2026-11-05', 'capsulas intactas', 'en revision'),
+(1, 16, 'np-2024-016', 40, '2027-03-20', 'nuevo lote', 'aprobado'),
+(2, 17, 'ct-2024-017', 55, '2026-07-11', 'buen estado general', 'pendiente'),
+(5, 18, 'in-2024-018', 10, '2026-05-30', 'necesita cadena de frio', 'aprobado');
+
+-- solicitudes clinicas ampliadas (mas del triple: 18 registros)
+insert into solicitudes_clinicas (id_clinica, id_medicamento, cantidad_solicitada, estado_solicitud) values 
+(3, 1, 50, 'pendiente'),
+(4, 2, 30, 'aprobado'),
+(3, 3, 20, 'entregado'),
+(4, 4, 60, 'pendiente'),
+(3, 5, 25, 'aprobado'),
+(4, 6, 40, 'entregado'),
+(3, 7, 30, 'aprobado'),
+(4, 8, 25, 'pendiente'),
+(3, 9, 45, 'entregado'),
+(4, 10, 15, 'aprobado'),
+(3, 11, 20, 'pendiente'),
+(4, 12, 50, 'entregado'),
+(3, 13, 35, 'aprobado'),
+(4, 14, 20, 'pendiente'),
+(3, 15, 15, 'entregado'),
+(4, 16, 40, 'aprobado'),
+(3, 17, 30, 'pendiente'),
+(4, 18, 10, 'aprobado');

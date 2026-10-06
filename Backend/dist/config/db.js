@@ -1,34 +1,38 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.pool = void 0;
-exports.checkDatabaseConnection = checkDatabaseConnection;
-exports.isDbConnected = isDbConnected;
-const pg_1 = require("pg");
+exports.checkDatabaseConnection = exports.pool = void 0;
+const promise_1 = __importDefault(require("mysql2/promise"));
 const env_1 = require("./env");
-exports.pool = new pg_1.Pool({
-    connectionString: env_1.ENV.DATABASE_URL,
-    ssl: env_1.ENV.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+exports.pool = promise_1.default.createPool({
+    host: env_1.ENV.DB_HOST,
+    user: env_1.ENV.DB_USER,
+    password: env_1.ENV.DB_PASSWORD,
+    database: env_1.ENV.DB_NAME,
+    port: env_1.ENV.DB_PORT,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
-let isPostgresConnected = false;
-async function checkDatabaseConnection() {
+const checkDatabaseConnection = async () => {
     const start = Date.now();
     try {
-        const client = await exports.pool.connect();
-        const res = await client.query('SELECT NOW() as current_time');
-        client.release();
-        const latency = Date.now() - start;
-        isPostgresConnected = true;
-        return { connected: true, latencyMs: latency };
+        const connection = await exports.pool.getConnection();
+        const latencyMs = Date.now() - start;
+        console.log(`¡Conectado exitosamente a la base de datos MySQL (${env_1.ENV.DB_NAME}) en ${latencyMs}ms!`);
+        connection.release();
+        return { connected: true, latencyMs };
     }
-    catch (err) {
-        isPostgresConnected = false;
+    catch (error) {
+        const latencyMs = Date.now() - start;
+        console.error(' Error al conectar a MySQL:', error?.message || error);
         return {
             connected: false,
-            latencyMs: Date.now() - start,
-            error: 'Servidor PostgreSQL no conectado localmente. Modo de contingencia en memoria activo.',
+            latencyMs,
+            error: error?.message || 'No se pudo establecer conexión con MySQL',
         };
     }
-}
-function isDbConnected() {
-    return isPostgresConnected;
-}
+};
+exports.checkDatabaseConnection = checkDatabaseConnection;

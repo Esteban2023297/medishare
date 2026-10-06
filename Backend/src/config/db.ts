@@ -12,14 +12,27 @@ export const pool = mysql.createPool({
   queueLimit: 0
 });
 
-export const checkDatabaseConnection = async () => {
+export interface DbConnectionStatus {
+  connected: boolean;
+  latencyMs: number;
+  error?: string;
+}
+
+export const checkDatabaseConnection = async (): Promise<DbConnectionStatus> => {
+  const start = Date.now();
   try {
     const connection = await pool.getConnection();
-    console.log('✅ ¡Conectado exitosamente a la base de datos MySQL (medishare_db)!');
+    const latencyMs = Date.now() - start;
+    console.log(` ¡Conectado exitosamente a la base de datos MySQL (${ENV.DB_NAME}) en ${latencyMs}ms!`);
     connection.release();
-    return true;
-  } catch (error) {
-    console.error('❌ Error al conectar a MySQL:', error);
-    return false;
+    return { connected: true, latencyMs };
+  } catch (error: any) {
+    const latencyMs = Date.now() - start;
+    console.error(' Error al conectar a MySQL:', error?.message || error);
+    return {
+      connected: false,
+      latencyMs,
+      error: error?.message || 'No se pudo establecer conexión con MySQL',
+    };
   }
 };

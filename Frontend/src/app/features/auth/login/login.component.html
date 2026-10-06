@@ -21,28 +21,6 @@
 
   <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
     <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl">
-      
-      <!-- Selector rápido de cuentas demo para pruebas -->
-      <div class="mb-6 p-3.5 rounded-xl bg-slate-950/80 border border-slate-800/90 text-xs">
-        <span class="text-[11px] font-bold text-sky-400 uppercase tracking-wider block mb-2">Acceso Rápido de Prueba:</span>
-        <div class="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            (click)="fillDemo('admin')"
-            class="px-2.5 py-2 rounded-lg bg-sky-950/50 hover:bg-sky-900/60 border border-sky-800/60 text-sky-300 font-semibold text-center transition-all"
-          >
-            🔑 Rol Administrador
-          </button>
-          <button
-            type="button"
-            (click)="fillDemo('usuario')"
-            class="px-2.5 py-2 rounded-lg bg-emerald-950/50 hover:bg-emerald-900/60 border border-emerald-800/60 text-emerald-300 font-semibold text-center transition-all"
-          >
-            👤 Rol Usuario / Donante
-          </button>
-        </div>
-      </div>
-
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-5">
         
         <!-- Campo Correo Electrónico (cualquier extensión) -->

@@ -25,14 +25,14 @@ export class RegisterComponent {
     email: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)]],
     role: ['usuario' as UserRole, [Validators.required]],
     institution: [''],
-    password: ['123456', [Validators.required, Validators.minLength(6)]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
   get name() { return this.registerForm.get('name'); }
   get email() { return this.registerForm.get('email'); }
   get password() { return this.registerForm.get('password'); }
 
-  public onSubmit(): void {
+  public async onSubmit(): Promise<void> {
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
       return;
@@ -41,26 +41,25 @@ export class RegisterComponent {
     this.isRegistering.set(true);
     this.errorMessage.set(null);
 
-    setTimeout(() => {
-      const val = this.registerForm.value;
-      const res = this.authService.register({
-        name: val.name,
-        email: val.email,
-        role: val.role,
-        institution: val.institution,
-      });
+    const val = this.registerForm.value;
+    const res = await this.authService.register({
+      name: val.name,
+      email: val.email,
+      password: val.password,
+      role: val.role,
+      institution: val.institution,
+    });
 
-      this.isRegistering.set(false);
+    this.isRegistering.set(false);
 
-      if (res.success && res.user) {
-        if (res.user.role === 'admin') {
-          this.router.navigate(['/admin']);
-        } else {
-          this.router.navigate(['/portal-usuario']);
-        }
+    if (res.success && res.user) {
+      if (res.user.role === 'admin') {
+        this.router.navigate(['/admin']);
       } else {
-        this.errorMessage.set(res.message);
+        this.router.navigate(['/portal-usuario']);
       }
-    }, 450);
+    } else {
+      this.errorMessage.set(res.message);
+    }
   }
 }

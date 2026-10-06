@@ -9,7 +9,6 @@ const db_1 = require("./config/db");
 const env_1 = require("./config/env");
 const api_routes_1 = require("./routes/api.routes");
 const app = (0, express_1.default)();
-// Middlewares globales
 app.use((0, cors_1.default)({
     origin: '*', // Permitir solicitudes desde el frontend Angular (localhost:4200)
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -50,11 +49,11 @@ app.listen(env_1.ENV.PORT, async () => {
     console.log('====================================================');
     const dbStatus = await (0, db_1.checkDatabaseConnection)();
     if (dbStatus.connected) {
-        console.log(`✅ Conexión con PostgreSQL exitosa (${dbStatus.latencyMs}ms).`);
+        console.log(`✅ Conexión con MySQL exitosa (${dbStatus.latencyMs}ms).`);
     }
     else {
-        console.log(`ℹ️ [Aviso Base de Datos]: ${dbStatus.error}`);
-        console.log('📦 Almacén en memoria sincronizado con schema.sql operativo.');
+        console.log(`⚠️ [Aviso Base de Datos]: ${dbStatus.error}`);
     }
+    console.log(`💡 Para abrir el Panel de Terminal interactivo, ejecuta: pnpm panel`);
 });
 exports.default = app;

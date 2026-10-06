@@ -50,8 +50,8 @@
           <p class="text-3xl font-black text-white mt-1">{{ userTotalUnits() }} <span class="text-xs font-normal text-slate-400">uds.</span></p>
           <span class="text-[11px] text-emerald-400 mt-1 block">Aporte médico activo</span>
         </div>
-        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl">
-          💊
+        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
         </div>
       </div>
 
@@ -61,8 +61,8 @@
           <p class="text-3xl font-black text-sky-400 mt-1">{{ userApprovedCount() }}</p>
           <span class="text-[11px] text-slate-400 mt-1 block">Superaron el filtro sanitario</span>
         </div>
-        <div class="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center text-xl">
-          ✅
+        <div class="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
         </div>
       </div>
 
@@ -72,8 +72,8 @@
           <p class="text-3xl font-black text-amber-400 mt-1">{{ userPendingCount() }}</p>
           <span class="text-[11px] text-amber-400/80 mt-1 block">Revisión de empaque y lote</span>
         </div>
-        <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-xl">
-          ⏳
+        <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
         </div>
       </div>
 
@@ -85,7 +85,7 @@
       <div class="p-6 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 class="text-lg font-bold text-white flex items-center gap-2">
-            <span>📦</span> Mis Medicamentos Donados
+            Mis Medicamentos Donados
           </h2>
           <p class="text-xs text-slate-400 mt-0.5">Seguimiento en tiempo real de los medicamentos que has compartido con la red.</p>
         </div>
@@ -151,7 +151,7 @@
                     </span>
                   </td>
                   <td class="py-4 px-6">
-                    <span class="text-emerald-400 font-medium">✓ {{ item.expirationDate }}</span>
+                    <span class="text-emerald-400 font-medium">{{ item.expirationDate }}</span>
                   </td>
                   <td class="py-4 px-6">
                     <app-status-badge [status]="item.status"></app-status-badge>
