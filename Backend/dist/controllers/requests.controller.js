@@ -10,6 +10,37 @@ function parseRequestId(idStr) {
     const parsed = parseInt(digits || idStr, 10);
     return isNaN(parsed) ? null : parsed;
 }
+function formatRequestStatus(raw) {
+    const s = (raw || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    if (s.includes('aprob'))
+        return 'Aprobada';
+    if (s.includes('entreg'))
+        return 'Entregada';
+    if (s.includes('camino'))
+        return 'En camino';
+    return 'Pendiente';
+}
+function formatPresentation(raw) {
+    const s = (raw || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    if (s.includes('capsul'))
+        return 'Cápsulas';
+    if (s.includes('jarabe'))
+        return 'Jarabe';
+    if (s.includes('gota'))
+        return 'Gotas';
+    if (s.includes('inyect'))
+        return 'Inyectable';
+    if (s.includes('inhal'))
+        return 'Inhalador';
+    if (s.includes('pomada') || s.includes('gel'))
+        return 'Pomada / Gel';
+    return 'Tabletas';
+}
+function capitalizeWords(str) {
+    if (!str)
+        return '';
+    return str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+}
 async function listRequests(req, res) {
     try {
         const [rows] = await db_1.pool.query(`
@@ -26,13 +57,13 @@ async function listRequests(req, res) {
     `);
         const requests = rows.map((s) => ({
             id: `SOL-${String(s.id_solicitud).padStart(3, '0')}`,
-            clinicName: s.clinicName || 'Clínica Comunitaria',
-            activeIngredient: s.activeIngredient || s.commercialName || 'Medicamento general',
-            presentation: (s.presentation || 'Tabletas'),
+            clinicName: capitalizeWords(s.clinicName || 'Clínica Comunitaria'),
+            activeIngredient: capitalizeWords(s.activeIngredient || s.commercialName || 'Medicamento general'),
+            presentation: formatPresentation(s.presentation),
             requestedUnits: Number(s.cantidad_solicitada) || 0,
             requestDate: s.fecha_solicitud ? new Date(s.fecha_solicitud).toISOString().split('T')[0] : '2026-01-01',
             urgency: 'Media',
-            status: (s.estado_solicitud === 'aprobado' ? 'Aprobada' : (s.estado_solicitud === 'entregado' ? 'Entregada' : (s.estado_solicitud || 'Pendiente'))),
+            status: formatRequestStatus(s.estado_solicitud),
         }));
         res.json({ count: requests.length, requests });
     }

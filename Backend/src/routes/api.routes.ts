@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { getCurrentUser, login, register } from '../controllers/auth.controller';
 import { createDonation, deleteDonation, listDonations, updateDonation } from '../controllers/donations.controller';
-import { getDatabaseStatus, getDatabaseTables } from '../controllers/database.controller';
+import { getDatabaseStatus, getDatabaseTables, getDatabaseViews } from '../controllers/database.controller';
 import { getHealthStatus } from '../controllers/health.controller';
 import { createMedicine, deleteMedicine, getMedicineById, listMedicines, updateMedicine } from '../controllers/medicines.controller';
 import { getMetrics } from '../controllers/metrics.controller';
@@ -16,6 +16,7 @@ apiRouter.get('/health', getHealthStatus);
 apiRouter.get('/metrics', getMetrics);
 apiRouter.get('/database/status', getDatabaseStatus);
 apiRouter.get('/database/tables', getDatabaseTables);
+apiRouter.get('/database/views', getDatabaseViews);
 
 
 // Autenticación

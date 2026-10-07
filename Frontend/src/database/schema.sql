@@ -8,6 +8,13 @@ use medishare_In5bm;
 -- desactivar temporalmente restricciones de llaves foraneas para recrear tablas limpiamente
 set foreign_key_checks = 0;
 
+drop view if exists vista_kpis_donaciones;
+drop view if exists vista_resumen_inventario_categoria;
+drop view if exists vista_usuarios_roles;
+drop view if exists vista_solicitudes_clinicas_detalle;
+drop view if exists vista_donaciones_detalle;
+drop view if exists vista_medicamentos_disponibles;
+
 drop table if exists solicitudes_clinicas;
 drop table if exists donaciones;
 drop table if exists medicamentos;
@@ -151,3 +158,96 @@ insert into solicitudes_clinicas (id_clinica, id_medicamento, cantidad_solicitad
 (4, 16, 40, 'aprobado'),
 (3, 17, 30, 'pendiente'),
 (4, 18, 10, 'aprobado');
+
+-- ============================================================================
+-- 3. VISTAS SQL RELACIONALES (VIEWS)
+-- ============================================================================
+
+-- 3.1. Vista: Fármacos disponibles y semáforo de inventario
+create or replace view vista_medicamentos_disponibles as
+select 
+    id_medicamento,
+    nombre_comercial,
+    principio_activo,
+    presentacion,
+    categoria,
+    stock_total,
+    estado,
+    case 
+        when stock_total <= 50 then 'Crítico'
+        when stock_total <= 100 then 'Bajo'
+        else 'Óptimo'
+    end as semaforo_stock
+from medicamentos;
+
+-- 3.2. Vista: Detalle ampliado de Donaciones con datos de Donante y Medicamento
+create or replace view vista_donaciones_detalle as
+select 
+    d.id_donacion,
+    d.id_usuario,
+    u.nombre as nombre_donante,
+    u.correo as correo_donante,
+    d.id_medicamento,
+    m.nombre_comercial,
+    m.principio_activo,
+    m.presentacion,
+    m.categoria,
+    d.numero_lote,
+    d.cantidad_unidades,
+    d.fecha_caducidad,
+    d.observaciones,
+    d.estado_tramite,
+    d.fecha_donacion
+from donaciones d
+inner join usuarios u on d.id_usuario = u.id_usuario
+inner join medicamentos m on d.id_medicamento = m.id_medicamento;
+
+-- 3.3. Vista: Detalle ampliado de Solicitudes Clínicas con datos de Clínica e Inventario
+create or replace view vista_solicitudes_clinicas_detalle as
+select 
+    s.id_solicitud,
+    s.id_clinica,
+    u.nombre as nombre_clinica,
+    u.correo as correo_clinica,
+    s.id_medicamento,
+    m.nombre_comercial,
+    m.principio_activo,
+    m.presentacion,
+    m.stock_total as stock_actual_inventario,
+    s.cantidad_solicitada,
+    s.estado_solicitud,
+    s.fecha_solicitud
+from solicitudes_clinicas s
+inner join usuarios u on s.id_clinica = u.id_usuario
+inner join medicamentos m on s.id_medicamento = m.id_medicamento;
+
+-- 3.4. Vista: Usuarios activos con su Rol del sistema
+create or replace view vista_usuarios_roles as
+select 
+    u.id_usuario,
+    u.nombre,
+    u.correo,
+    u.id_rol,
+    r.nombre_rol,
+    u.fecha_registro
+from usuarios u
+inner join roles r on u.id_rol = r.id_rol;
+
+-- 3.5. Vista: Resumen de existencias agrupado por Categoría Terapéutica
+create or replace view vista_resumen_inventario_categoria as
+select 
+    categoria,
+    count(id_medicamento) as total_farmacos_distintos,
+    coalesce(sum(stock_total), 0) as total_unidades_inventario,
+    sum(case when estado = 'alta demanda' then 1 else 0 end) as farmacos_alta_demanda
+from medicamentos
+group by categoria;
+
+-- 3.6. Vista: KPIs de impacto y estado de Donaciones
+create or replace view vista_kpis_donaciones as
+select 
+    estado_tramite,
+    count(id_donacion) as cantidad_donaciones,
+    coalesce(sum(cantidad_unidades), 0) as total_unidades_donadas
+from donaciones
+group by estado_tramite;

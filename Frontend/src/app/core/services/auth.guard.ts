@@ -10,7 +10,6 @@ export const adminGuard: CanActivateFn = () => {
     return true;
   }
 
-  // Si no es admin, redirige al portal de usuario o a login
   if (authService.isAuthenticated()) {
     return router.parseUrl('/portal-usuario');
   }

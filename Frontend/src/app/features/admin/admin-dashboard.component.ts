@@ -348,9 +348,10 @@ export class AdminDashboardComponent {
   }
 
   public goToTableTab(tableName: string): void {
-    if (tableName === 'medicamentos') this.activeTab.set('catalogo');
-    else if (tableName === 'donaciones') this.activeTab.set('donaciones');
-    else if (tableName === 'solicitudes_clinicas') this.activeTab.set('solicitudes');
+    if (tableName === 'medicamentos' || tableName.includes('medicamento')) this.activeTab.set('medicamentos');
+    else if (tableName === 'donaciones' || tableName.includes('donacion')) this.activeTab.set('donaciones');
+    else if (tableName === 'solicitudes_clinicas' || tableName.includes('solicitud')) this.activeTab.set('solicitudes');
     else if (tableName === 'usuarios' || tableName === 'roles') this.activeTab.set('usuarios');
+    else this.activeTab.set('medicamentos');
   }
 }

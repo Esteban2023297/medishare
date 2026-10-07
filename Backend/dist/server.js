@@ -43,17 +43,17 @@ app.use((err, req, res, next) => {
 // Inicialización del servidor
 app.listen(env_1.ENV.PORT, async () => {
     console.log('====================================================');
-    console.log(`🚀 MediShare Backend API ejecutándose en puerto ${env_1.ENV.PORT}`);
-    console.log(`🔗 URL Base: http://localhost:${env_1.ENV.PORT}/api`);
-    console.log(`🌐 CORS habilitado para: ${env_1.ENV.CORS_ORIGIN}`);
+    console.log(` MediShare Backend API ejecutándose en puerto ${env_1.ENV.PORT}`);
+    console.log(` URL Base: http://localhost:${env_1.ENV.PORT}/api`);
+    console.log(` CORS habilitado para: ${env_1.ENV.CORS_ORIGIN}`);
     console.log('====================================================');
     const dbStatus = await (0, db_1.checkDatabaseConnection)();
     if (dbStatus.connected) {
-        console.log(`✅ Conexión con MySQL exitosa (${dbStatus.latencyMs}ms).`);
+        console.log(` Conexión con MySQL exitosa (${dbStatus.latencyMs}ms).`);
     }
     else {
-        console.log(`⚠️ [Aviso Base de Datos]: ${dbStatus.error}`);
+        console.log(` [Aviso Base de Datos]: ${dbStatus.error}`);
     }
-    console.log(`💡 Para abrir el Panel de Terminal interactivo, ejecuta: pnpm panel`);
+    console.log(` Para abrir el Panel de Terminal interactivo, ejecuta: pnpm panel`);
 });
 exports.default = app;

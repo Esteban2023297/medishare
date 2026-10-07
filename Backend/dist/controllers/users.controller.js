@@ -11,6 +11,11 @@ function parseUserId(idStr) {
     const parsed = parseInt(digits || idStr, 10);
     return isNaN(parsed) ? null : parsed;
 }
+function capitalizeWords(str) {
+    if (!str)
+        return '';
+    return str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+}
 async function listUsers(req, res) {
     try {
         const [rows] = await db_1.pool.query(`SELECT u.id_usuario, u.nombre, u.correo, u.contrasena, u.id_rol, r.nombre_rol, u.fecha_registro
@@ -22,10 +27,10 @@ async function listUsers(req, res) {
             const isClinica = u.id_rol === 2 || (u.nombre_rol && u.nombre_rol.toLowerCase() === 'clinica');
             return {
                 id: `USR-${String(u.id_usuario).padStart(3, '0')}`,
-                name: u.nombre,
+                name: capitalizeWords(u.nombre),
                 email: u.correo,
                 role: isAdmin ? 'admin' : 'usuario',
-                institution: isClinica ? u.nombre : (isAdmin ? 'Administración Central' : 'Particular'),
+                institution: isClinica ? capitalizeWords(u.nombre) : (isAdmin ? 'Administración Central' : 'Particular'),
                 status: 'Activo',
                 createdAt: u.fecha_registro ? new Date(u.fecha_registro).toISOString().split('T')[0] : '2026-01-01',
             };

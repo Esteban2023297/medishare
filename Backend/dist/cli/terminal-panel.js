@@ -43,7 +43,7 @@ async function startTerminalPanel() {
     const rl = readline.createInterface({ input: process_1.stdin, output: process_1.stdout });
     try {
         console.log('\n=============================================================');
-        console.log(' PANEL DE TERMINAL INTERACTIVO - MEDISHARE (VS CODE)');
+        console.log('  PANEL DE TERMINAL INTERACTIVO - MEDISHARE (VS CODE)');
         console.log('=============================================================');
         console.log('Este panel te permite iniciar sesión y gestionar el CRUD');
         console.log('directamente desde esta consola de Visual Studio Code.\n');
@@ -80,7 +80,7 @@ async function startTerminalPanel() {
             else {
                 // Menú principal una vez autenticado
                 console.log('\n=============================================================');
-                console.log(`👤 SESIÓN ACTIVA: ${activeUser.nombre} (${activeUser.correo}) | Rol: ${activeUser.rol}`);
+                console.log(` SESIÓN ACTIVA: ${activeUser.nombre} (${activeUser.correo}) | Rol: ${activeUser.rol}`);
                 console.log('=============================================================');
                 console.log('[1]  Medicamentos (Ver catálogo, Crear, Editar, Eliminar)');
                 console.log('[2]  Donaciones (Ver lista, Crear, Editar, Eliminar)');
@@ -150,7 +150,7 @@ async function handleCliLogin(rl) {
        LEFT JOIN roles r ON u.id_rol = r.id_rol
        WHERE LOWER(u.correo) = ? LIMIT 1`, [email]);
         if (rows.length === 0) {
-            console.log(' Error: Usuario no registrado en la base de datos MySQL.');
+            console.log('Error: Usuario no registrado en la base de datos MySQL.');
             return;
         }
         const u = rows[0];
@@ -203,11 +203,11 @@ async function handleCliRegister(rl) {
 // =============================================================
 async function menuMedicamentos(rl) {
     while (true) {
-        console.log('\n--- GESTIÓN DE MEDICAMENTOS (MYSQL) ---');
+        console.log('\n---  GESTIÓN DE MEDICAMENTOS (MYSQL) ---');
         console.log('[1] Listar catálogo de medicamentos');
         console.log('[2] Crear nuevo medicamento');
-        console.log('[3] Editar medicamento existente');
-        console.log('[4] Eliminar medicamento');
+        console.log('[3]  Editar medicamento existente');
+        console.log('[4]  Eliminar medicamento');
         console.log('[0] Volver al menú principal');
         const opt = (await rl.question('\nOpción: ')).trim();
         if (opt === '1') {
@@ -231,7 +231,7 @@ async function menuMedicamentos(rl) {
             console.log(` Medicamento agregado a MySQL exitosamente con ID ${res.insertId}.`);
         }
         else if (opt === '3') {
-            console.log('\n---  Editar Medicamento ---');
+            console.log('\n--- Editar Medicamento ---');
             const idStr = (await rl.question('Ingresa el ID del medicamento a editar: ')).trim();
             const id = parseInt(idStr.replace(/\D/g, ''), 10);
             if (isNaN(id)) {
@@ -240,7 +240,7 @@ async function menuMedicamentos(rl) {
             }
             const [rows] = await db_1.pool.query('SELECT * FROM medicamentos WHERE id_medicamento = ?', [id]);
             if (rows.length === 0) {
-                console.log(' Medicamento no encontrado.');
+                console.log('Medicamento no encontrado.');
                 continue;
             }
             const cur = rows[0];
@@ -253,7 +253,7 @@ async function menuMedicamentos(rl) {
             const newStock = stockInput ? parseInt(stockInput, 10) : cur.stock_total;
             const newEstado = (await rl.question(`Estado [${cur.estado}]: `)).trim() || cur.estado;
             await db_1.pool.query('UPDATE medicamentos SET nombre_comercial = ?, principio_activo = ?, presentacion = ?, categoria = ?, stock_total = ?, estado = ? WHERE id_medicamento = ?', [newComm, newActive, newPres, newCat, newStock, newEstado, id]);
-            console.log(` ¡Medicamento ID ${id} actualizado con éxito en MySQL!`);
+            console.log(`¡Medicamento ID ${id} actualizado con éxito en MySQL!`);
         }
         else if (opt === '4') {
             const idStr = (await rl.question('Ingresa el ID del medicamento a eliminar: ')).trim();
@@ -265,7 +265,7 @@ async function menuMedicamentos(rl) {
             await db_1.pool.query('DELETE FROM solicitudes_clinicas WHERE id_medicamento = ?', [id]);
             await db_1.pool.query('DELETE FROM donaciones WHERE id_medicamento = ?', [id]);
             await db_1.pool.query('DELETE FROM medicamentos WHERE id_medicamento = ?', [id]);
-            console.log(`Medicamento ID ${id} eliminado de MySQL.`);
+            console.log(` Medicamento ID ${id} eliminado de MySQL.`);
         }
         else if (opt === '0') {
             break;
@@ -280,8 +280,8 @@ async function menuDonaciones(rl) {
         console.log('\n---  GESTIÓN DE DONACIONES (MYSQL) ---');
         console.log('[1] Listar donaciones');
         console.log('[2] Registrar nueva donación');
-        console.log('[3] Editar donación (estado, unidades, lote, etc.)');
-        console.log('[4] Eliminar donación');
+        console.log('[3]  Editar donación (estado, unidades, lote, etc.)');
+        console.log('[4] +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Eliminar donación');
         console.log('[0] Volver al menú principal');
         const opt = (await rl.question('\nOpción: ')).trim();
         if (opt === '1') {
@@ -317,7 +317,7 @@ async function menuDonaciones(rl) {
             console.log(` Donación guardada en MySQL con ID ${res.insertId}.`);
         }
         else if (opt === '3') {
-            console.log('\n---  Editar Donación ---');
+            console.log('\n--- Editar Donación ---');
             const idStr = (await rl.question('Ingresa el ID de la donación a editar: ')).trim();
             const id = parseInt(idStr.replace(/\D/g, ''), 10);
             if (isNaN(id)) {
@@ -361,11 +361,11 @@ async function menuDonaciones(rl) {
 // =============================================================
 async function menuSolicitudes(rl) {
     while (true) {
-        console.log('\n--- GESTIÓN DE SOLICITUDES CLÍNICAS (MYSQL) ---');
+        console.log('\n---  GESTIÓN DE SOLICITUDES CLÍNICAS (MYSQL) ---');
         console.log('[1] Listar solicitudes clínicas');
         console.log('[2] Registrar nueva solicitud');
-        console.log('[3] Editar solicitud (estado, unidades, etc.)');
-        console.log('[4] Eliminar solicitud');
+        console.log('[3]  Editar solicitud (estado, unidades, etc.)');
+        console.log('[4]  Eliminar solicitud');
         console.log('[0] Volver al menú principal');
         const opt = (await rl.question('\nOpción: ')).trim();
         if (opt === '1') {
@@ -376,7 +376,7 @@ async function menuSolicitudes(rl) {
          LEFT JOIN usuarios u ON s.id_clinica = u.id_usuario
          LEFT JOIN medicamentos m ON s.id_medicamento = m.id_medicamento
          ORDER BY s.id_solicitud DESC`);
-            console.log(`\n Solicitudes Clínicas en MySQL (${reqs.length} registros):`);
+            console.log(`\nSolicitudes Clínicas en MySQL (${reqs.length} registros):`);
             console.table(reqs);
         }
         else if (opt === '2') {
@@ -392,7 +392,7 @@ async function menuSolicitudes(rl) {
             console.log(` Solicitud registrada con ID ${res.insertId} en MySQL.`);
         }
         else if (opt === '3') {
-            console.log('\n--- Editar Solicitud Clínica ---');
+            console.log('\n---  Editar Solicitud Clínica ---');
             const idStr = (await rl.question('Ingresa el ID de la solicitud a editar: ')).trim();
             const id = parseInt(idStr.replace(/\D/g, ''), 10);
             if (isNaN(id)) {
@@ -401,7 +401,7 @@ async function menuSolicitudes(rl) {
             }
             const [rows] = await db_1.pool.query('SELECT * FROM solicitudes_clinicas WHERE id_solicitud = ?', [id]);
             if (rows.length === 0) {
-                console.log(' Solicitud no encontrada.');
+                console.log('Solicitud no encontrada.');
                 continue;
             }
             const cur = rows[0];
@@ -410,7 +410,7 @@ async function menuSolicitudes(rl) {
             const newUnits = unitsInput ? parseInt(unitsInput, 10) : cur.cantidad_solicitada;
             const newStatus = (await rl.question(`Estado (pendiente / aprobado / entregado) [${cur.estado_solicitud}]: `)).trim() || cur.estado_solicitud;
             await db_1.pool.query('UPDATE solicitudes_clinicas SET cantidad_solicitada = ?, estado_solicitud = ? WHERE id_solicitud = ?', [newUnits, newStatus, id]);
-            console.log(`¡Solicitud ID ${id} actualizada con éxito en MySQL!`);
+            console.log(` ¡Solicitud ID ${id} actualizada con éxito en MySQL!`);
         }
         else if (opt === '4') {
             const idStr = (await rl.question('Ingresa el ID de la solicitud a eliminar: ')).trim();
@@ -488,7 +488,7 @@ async function menuUsuarios(rl) {
             const newIdRol = rolInput ? parseInt(rolInput, 10) : cur.id_rol;
             const newPass = (await rl.question(`Nueva Contraseña [dejar en blanco para mantener actual]: `)).trim() || cur.contrasena;
             await db_1.pool.query('UPDATE usuarios SET nombre = ?, correo = ?, contrasena = ?, id_rol = ? WHERE id_usuario = ?', [newName, newEmail, newPass, newIdRol, id]);
-            console.log(`¡Usuario ID ${id} actualizado con éxito en MySQL!`);
+            console.log(` ¡Usuario ID ${id} actualizado con éxito en MySQL!`);
         }
         else if (opt === '4') {
             const idStr = (await rl.question('Ingresa el ID del usuario a eliminar: ')).trim();
@@ -521,7 +521,7 @@ async function menuEstadoDb() {
         console.log(`• Base de Datos:  ${env_1.ENV.DB_NAME}`);
         console.log(`• Usuario DB:     ${env_1.ENV.DB_USER}`);
         console.log(`• Estado:          Conectado y Operativo`);
-        console.log('\n Registros Actuales en MySQL:');
+        console.log('\nRegistros Actuales en MySQL:');
         console.log(`  - Medicamentos:         ${tMeds[0].count}`);
         console.log(`  - Donaciones:           ${tDons[0].count}`);
         console.log(`  - Solicitudes Clínicas: ${tReqs[0].count}`);

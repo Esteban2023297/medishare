@@ -11,15 +11,12 @@ export class AuthService {
   private readonly apiService = inject(ApiService);
   private readonly router = inject(Router);
 
-  // Lista de usuarios sincronizada con MySQL
   private readonly _users = signal<User[]>([]);
   public readonly users = this._users.asReadonly();
 
-  // Usuario autenticado actual
   private readonly _currentUser = signal<User | null>(this._getInitialUser());
   public readonly currentUser = this._currentUser.asReadonly();
 
-  // Señales computadas reactivas
   public readonly isAuthenticated = computed(() => this._currentUser() !== null);
   public readonly isAdmin = computed(() => this._currentUser()?.role === 'admin');
   public readonly isUser = computed(() => this._currentUser()?.role === 'usuario');
@@ -28,9 +25,7 @@ export class AuthService {
     this.loadUsers();
   }
 
-  /**
-   * Carga los usuarios existentes desde MySQL
-   */
+  
   public loadUsers(): void {
     this.apiService.get<{ users: User[] }>('/users').subscribe({
       next: (res) => {
@@ -85,6 +80,9 @@ export class AuthService {
       );
 
       if (res?.user) {
+        if (res.token && typeof localStorage !== 'undefined') {
+          localStorage.setItem('medishare_token', res.token);
+        }
         this._setCurrentUser(res.user);
         this.loadUsers();
         return { success: true, message: res.message || `Bienvenido, ${res.user.name}`, user: res.user };
@@ -128,6 +126,9 @@ export class AuthService {
       );
 
       if (res?.user) {
+        if (res.token && typeof localStorage !== 'undefined') {
+          localStorage.setItem('medishare_token', res.token);
+        }
         this._setCurrentUser(res.user);
         this.loadUsers();
         return { success: true, message: 'Usuario registrado exitosamente en MediShare.', user: res.user };
@@ -145,6 +146,7 @@ export class AuthService {
     this._currentUser.set(null);
     if (typeof localStorage !== 'undefined') {
       localStorage.removeItem('medishare_user');
+      localStorage.removeItem('medishare_token');
     }
     this.router.navigate(['/login']);
   }

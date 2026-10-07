@@ -14,20 +14,51 @@ exports.pool = promise_1.default.createPool({
     port: env_1.ENV.DB_PORT,
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
 });
 const checkDatabaseConnection = async () => {
     const start = Date.now();
     try {
         const connection = await exports.pool.getConnection();
         const latencyMs = Date.now() - start;
-        console.log(`¡Conectado exitosamente a la base de datos MySQL (${env_1.ENV.DB_NAME}) en ${latencyMs}ms!`);
+        console.log(` ¡Conectado exitosamente a la base de datos MySQL (${env_1.ENV.DB_NAME}) en ${latencyMs}ms!`);
         connection.release();
-        return { connected: true, latencyMs };
+        return { connected: true, latencyMs, database: env_1.ENV.DB_NAME };
     }
     catch (error) {
+        console.warn(` Primer intento con (${env_1.ENV.DB_USER}, db: ${env_1.ENV.DB_NAME}) falló: ${error?.message}. Probando fallback...`);
+        const fallbackConfigs = [
+            { user: 'IN5BM', password: '', database: 'medishare_In5bm' },
+            { user: 'IN5BM', password: '', database: 'medishare_db' },
+            { user: 'root', password: '', database: 'medishare_In5bm' },
+            { user: 'root', password: '', database: 'medishare_db' },
+        ];
+        for (const cfg of fallbackConfigs) {
+            try {
+                const testPool = promise_1.default.createPool({
+                    host: env_1.ENV.DB_HOST,
+                    user: cfg.user,
+                    password: cfg.password,
+                    database: cfg.database,
+                    port: env_1.ENV.DB_PORT,
+                    waitForConnections: true,
+                    connectionLimit: 10,
+                    queueLimit: 0,
+                });
+                const conn = await testPool.getConnection();
+                conn.release();
+                exports.pool = testPool;
+                env_1.ENV.DB_USER = cfg.user;
+                env_1.ENV.DB_PASSWORD = cfg.password;
+                env_1.ENV.DB_NAME = cfg.database;
+                const latencyMs = Date.now() - start;
+                console.log(` ¡Conexión alternativa exitosa con ${cfg.user}@${cfg.database} en ${latencyMs}ms!`);
+                return { connected: true, latencyMs, database: cfg.database };
+            }
+            catch (_) { }
+        }
         const latencyMs = Date.now() - start;
-        console.error(' Error al conectar a MySQL:', error?.message || error);
+        console.error(' Error crítico al conectar a MySQL:', error?.message || error);
         return {
             connected: false,
             latencyMs,

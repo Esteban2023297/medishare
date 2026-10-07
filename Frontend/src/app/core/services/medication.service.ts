@@ -16,7 +16,6 @@ import {
 export class MedicationService {
   private readonly apiService = inject(ApiService);
 
-  // Lista de principios activos frecuentes para autocompletado inteligente
   public readonly commonActiveIngredients: string[] = [
     'Amoxicilina 500mg',
     'Amoxicilina + Ácido Clavulánico 500/125mg',

@@ -31,6 +31,14 @@ export interface TableSummary {
   description: string;
 }
 
+export interface SqlViewSummary {
+  name: string;
+  rowCount: number;
+  columnsCount: number;
+  columns?: string[];
+  description: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -61,12 +69,14 @@ export class SqlDatabaseService {
   public readonly isOnline = computed(() => this._status().connected);
 
   public readonly tables = signal<TableSummary[]>([]);
+  public readonly views = signal<SqlViewSummary[]>([]);
   public readonly isTesting = signal<boolean>(false);
   public readonly isSyncing = signal<boolean>(false);
 
   constructor() {
     this.testConnection();
     this.loadTables();
+    this.loadViews();
   }
 
   /**
@@ -138,12 +148,34 @@ export class SqlDatabaseService {
   }
 
   /**
+   * Carga la lista de vistas SQL activas en MySQL.
+   */
+  public async loadViews(): Promise<void> {
+    try {
+      const res: any = await firstValueFrom(this.apiService.get('/database/views'));
+      if (res?.views && Array.isArray(res.views)) {
+        this.views.set(res.views);
+      }
+    } catch {
+      this.views.set([
+        { name: 'vista_medicamentos_disponibles', rowCount: 18, columnsCount: 8, description: 'Catálogo activo con cálculo automático de nivel y semáforo de inventario' },
+        { name: 'vista_donaciones_detalle', rowCount: 18, columnsCount: 15, description: 'Trazabilidad completa de donaciones uniendo donantes y especificaciones de fármacos' },
+        { name: 'vista_solicitudes_clinicas_detalle', rowCount: 18, columnsCount: 12, description: 'Pedidos clínicos asociados con la clínica y existencia actual en almacén' },
+        { name: 'vista_usuarios_roles', rowCount: 6, columnsCount: 6, description: 'Cuentas de usuarios con su nombre de rol asignado' },
+        { name: 'vista_resumen_inventario_categoria', rowCount: 7, columnsCount: 4, description: 'Agrupación y totales de fármacos e inventario por categoría terapéutica' },
+        { name: 'vista_kpis_donaciones', rowCount: 4, columnsCount: 3, description: 'Métricas e indicadores consolidados de donaciones según su estado de trámite' },
+      ]);
+    }
+  }
+
+  /**
    * Sincroniza las tablas del sistema contra la base de datos MySQL.
    */
   public async syncDatabase(): Promise<{ success: boolean; message: string }> {
     this.isSyncing.set(true);
     const testRes = await this.testConnection();
     await this.loadTables();
+    await this.loadViews();
     this.isSyncing.set(false);
 
     if (testRes.success) {

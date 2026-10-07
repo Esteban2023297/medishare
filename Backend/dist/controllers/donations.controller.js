@@ -10,6 +10,55 @@ function parseDonationId(idStr) {
     const parsed = parseInt(digits || idStr, 10);
     return isNaN(parsed) ? null : parsed;
 }
+function formatDonationStatus(raw) {
+    const s = (raw || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    if (s.includes('aprob'))
+        return 'Aprobado';
+    if (s.includes('entreg'))
+        return 'Entregado';
+    if (s.includes('revis'))
+        return 'En revisión';
+    if (s.includes('rechaz'))
+        return 'Rechazado';
+    return 'Pendiente';
+}
+function formatCategory(raw) {
+    const s = (raw || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    if (s.includes('antibiot'))
+        return 'Antibióticos';
+    if (s.includes('diabet'))
+        return 'Diabetes';
+    if (s.includes('cardio'))
+        return 'Cardio';
+    if (s.includes('analges') || s.includes('antiinflam'))
+        return 'Analgésicos';
+    if (s.includes('respirat'))
+        return 'Respiratorio';
+    if (s.includes('gastro'))
+        return 'Gastrointestinal';
+    return 'Otros';
+}
+function formatPresentation(raw) {
+    const s = (raw || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    if (s.includes('capsul'))
+        return 'Cápsulas';
+    if (s.includes('jarabe'))
+        return 'Jarabe';
+    if (s.includes('gota'))
+        return 'Gotas';
+    if (s.includes('inyect'))
+        return 'Inyectable';
+    if (s.includes('inhal'))
+        return 'Inhalador';
+    if (s.includes('pomada') || s.includes('gel'))
+        return 'Pomada / Gel';
+    return 'Tabletas';
+}
+function capitalizeWords(str) {
+    if (!str)
+        return '';
+    return str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+}
 async function listDonations(req, res) {
     const { status, donorName } = req.query;
     try {
@@ -28,8 +77,8 @@ async function listDonations(req, res) {
     `;
         const params = [];
         if (status && status !== 'Todos') {
-            sql += ' AND LOWER(d.estado_tramite) = LOWER(?)';
-            params.push(String(status).trim());
+            sql += ' AND LOWER(d.estado_tramite) LIKE ?';
+            params.push(`%${String(status).trim().toLowerCase().slice(0, 5)}%`);
         }
         if (donorName) {
             sql += ' AND LOWER(u.nombre) LIKE ?';
@@ -39,15 +88,15 @@ async function listDonations(req, res) {
         const [rows] = await db_1.pool.query(sql, params);
         const donations = rows.map((d) => ({
             id: `DON-${String(d.id_donacion).padStart(3, '0')}`,
-            commercialName: d.commercialName || 'Medicamento',
-            activeIngredient: d.activeIngredient || 'Principio activo',
-            category: (d.category || 'Analgésicos'),
-            presentation: (d.presentation || 'Tabletas'),
-            batchNumber: d.numero_lote || 'LOT-2026',
+            commercialName: capitalizeWords(d.commercialName || 'Medicamento'),
+            activeIngredient: capitalizeWords(d.activeIngredient || 'Principio activo'),
+            category: formatCategory(d.category),
+            presentation: formatPresentation(d.presentation),
+            batchNumber: (d.numero_lote || 'LOT-2026').toUpperCase(),
             units: Number(d.cantidad_unidades) || 0,
             expirationDate: d.fecha_caducidad ? new Date(d.fecha_caducidad).toISOString().split('T')[0] : '2027-01-01',
-            status: (d.estado_tramite || 'Pendiente'),
-            donorName: d.donorName || 'Donante MediShare',
+            status: formatDonationStatus(d.estado_tramite),
+            donorName: capitalizeWords(d.donorName || 'Donante MediShare'),
             donorNotes: d.observaciones || '',
             targetClinic: '',
             createdAt: d.fecha_donacion ? new Date(d.fecha_donacion).toISOString().split('T')[0] : '2026-01-01',

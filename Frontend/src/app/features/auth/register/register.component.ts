@@ -32,6 +32,24 @@ export class RegisterComponent {
   get email() { return this.registerForm.get('email'); }
   get password() { return this.registerForm.get('password'); }
 
+  public getNameErrorMessage(): string {
+    if (this.name?.hasError('required')) return 'El nombre completo es requerido.';
+    if (this.name?.hasError('minlength')) return 'El nombre debe tener al menos 3 caracteres.';
+    return '';
+  }
+
+  public getEmailErrorMessage(): string {
+    if (this.email?.hasError('required')) return 'El correo electrónico es requerido.';
+    if (this.email?.hasError('pattern')) return 'Formato de correo no válido (ej. usuario@gmail.com o tu@you.com).';
+    return '';
+  }
+
+  public getPasswordErrorMessage(): string {
+    if (this.password?.hasError('required')) return 'La contraseña es requerida.';
+    if (this.password?.hasError('minlength')) return 'La contraseña debe tener al menos 6 caracteres.';
+    return '';
+  }
+
   public async onSubmit(): Promise<void> {
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
@@ -43,11 +61,11 @@ export class RegisterComponent {
 
     const val = this.registerForm.value;
     const res = await this.authService.register({
-      name: val.name,
-      email: val.email,
-      password: val.password,
+      name: (val.name || '').trim(),
+      email: (val.email || '').trim(),
+      password: (val.password || '').trim(),
       role: val.role,
-      institution: val.institution,
+      institution: (val.institution || '').trim(),
     });
 
     this.isRegistering.set(false);

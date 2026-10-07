@@ -10,6 +10,14 @@ export interface TableSummary {
   description: string;
 }
 
+export interface ViewSummary {
+  name: string;
+  rowCount: number;
+  columnsCount: number;
+  columns: string[];
+  description: string;
+}
+
 export async function getDatabaseStatus(req: Request, res: Response): Promise<void> {
   const check = await checkDatabaseConnection();
 
@@ -32,6 +40,11 @@ export async function getDatabaseStatus(req: Request, res: Response): Promise<vo
     const [reqs]: any = await pool.query('SELECT COUNT(*) as count FROM solicitudes_clinicas');
     const [usrs]: any = await pool.query('SELECT COUNT(*) as count FROM usuarios');
     const [rols]: any = await pool.query('SELECT COUNT(*) as count FROM roles');
+    const [viewsCountRaw]: any = await pool.query(`
+      SELECT COUNT(*) as count
+      FROM information_schema.views
+      WHERE table_schema = ?
+    `, [ENV.DB_NAME]);
 
     const totalRecords =
       Number(meds[0].count) +
@@ -48,6 +61,7 @@ export async function getDatabaseStatus(req: Request, res: Response): Promise<vo
       user: ENV.DB_USER,
       latencyMs: check.latencyMs,
       tablesCount: 5,
+      viewsCount: Number(viewsCountRaw[0]?.count) || 6,
       totalRecords,
       lastSync: new Date().toISOString(),
       counts: {
@@ -71,9 +85,9 @@ export async function getDatabaseStatus(req: Request, res: Response): Promise<vo
 export async function getDatabaseTables(req: Request, res: Response): Promise<void> {
   try {
     const [tablesRaw]: [any[], any] = await pool.query(`
-      SELECT table_name, table_rows
+      SELECT table_name
       FROM information_schema.tables
-      WHERE table_schema = ?
+      WHERE table_schema = ? AND table_type = 'BASE TABLE'
       ORDER BY table_name ASC
     `, [ENV.DB_NAME]);
 
@@ -115,5 +129,62 @@ export async function getDatabaseTables(req: Request, res: Response): Promise<vo
   } catch (error: any) {
     console.error('Error al listar tablas de MySQL:', error);
     res.status(500).json({ error: 'Error al obtener tablas de MySQL', details: error?.message });
+  }
+}
+
+export async function getDatabaseViews(req: Request, res: Response): Promise<void> {
+  try {
+    const [viewsRaw]: [any[], any] = await pool.query(`
+      SELECT table_name
+      FROM information_schema.views
+      WHERE table_schema = ?
+      ORDER BY table_name ASC
+    `, [ENV.DB_NAME]);
+
+    const viewDescriptions: Record<string, string> = {
+      vista_medicamentos_disponibles: 'Catálogo activo con cálculo automático de nivel y semáforo de inventario (Crítico/Bajo/Óptimo)',
+      vista_donaciones_detalle: 'Trazabilidad completa de donaciones uniendo donantes y especificaciones de fármacos',
+      vista_solicitudes_clinicas_detalle: 'Pedidos clínicos asociados con la clínica y existencia actual en almacén',
+      vista_usuarios_roles: 'Cuentas de usuarios con su nombre de rol asignado (donante, clínica, administrador)',
+      vista_resumen_inventario_categoria: 'Agrupación y totales de fármacos e inventario por categoría terapéutica',
+      vista_kpis_donaciones: 'Métricas e indicadores consolidados de donaciones según su estado de trámite',
+    };
+
+    const summaries: ViewSummary[] = [];
+
+    for (const v of viewsRaw) {
+      const name = v.TABLE_NAME || v.table_name;
+      let count = 0;
+      try {
+        const [c]: any = await pool.query(`SELECT COUNT(*) as count FROM ${name}`);
+        count = Number(c[0]?.count) || 0;
+      } catch (_) {}
+
+      const [colsRows]: any = await pool.query(`
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_schema = ? AND table_name = ?
+        ORDER BY ordinal_position ASC
+      `, [ENV.DB_NAME, name]);
+
+      const cols = colsRows.map((col: any) => col.COLUMN_NAME || col.column_name);
+
+      summaries.push({
+        name,
+        rowCount: count,
+        columnsCount: cols.length,
+        columns: cols,
+        description: viewDescriptions[name] || 'Vista relacional SQL de MediShare',
+      });
+    }
+
+    res.json({
+      database: ENV.DB_NAME,
+      count: summaries.length,
+      views: summaries,
+    });
+  } catch (error: any) {
+    console.error('Error al listar vistas de MySQL:', error);
+    res.status(500).json({ error: 'Error al obtener vistas de MySQL', details: error?.message });
   }
 }

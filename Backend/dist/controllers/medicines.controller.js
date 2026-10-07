@@ -11,14 +11,52 @@ function parseMedicineId(idStr) {
     const parsed = parseInt(digits || idStr, 10);
     return isNaN(parsed) ? null : parsed;
 }
+function formatCategory(raw) {
+    const s = (raw || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    if (s.includes('antibiot'))
+        return 'Antibióticos';
+    if (s.includes('diabet'))
+        return 'Diabetes';
+    if (s.includes('cardio'))
+        return 'Cardio';
+    if (s.includes('analges') || s.includes('antiinflam'))
+        return 'Analgésicos';
+    if (s.includes('respirat'))
+        return 'Respiratorio';
+    if (s.includes('gastro'))
+        return 'Gastrointestinal';
+    return 'Otros';
+}
+function formatPresentation(raw) {
+    const s = (raw || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    if (s.includes('capsul'))
+        return 'Cápsulas';
+    if (s.includes('jarabe'))
+        return 'Jarabe';
+    if (s.includes('gota'))
+        return 'Gotas';
+    if (s.includes('inyect'))
+        return 'Inyectable';
+    if (s.includes('inhal'))
+        return 'Inhalador';
+    if (s.includes('pomada') || s.includes('gel'))
+        return 'Pomada / Gel';
+    return 'Tabletas';
+}
+function capitalizeWords(str) {
+    if (!str)
+        return '';
+    return str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+}
 async function listMedicines(req, res) {
     const { q, category } = req.query;
     try {
         let sql = 'SELECT * FROM medicamentos WHERE 1=1';
         const params = [];
         if (category && category !== 'Todos') {
-            sql += ' AND LOWER(categoria) = LOWER(?)';
-            params.push(String(category).trim());
+            sql += ' AND LOWER(categoria) LIKE ?';
+            const catSearch = `%${String(category).trim().toLowerCase().slice(0, 5)}%`;
+            params.push(catSearch);
         }
         if (q) {
             const query = `%${String(q).trim().toLowerCase()}%`;
@@ -29,10 +67,10 @@ async function listMedicines(req, res) {
         const [rows] = await db_1.pool.query(sql, params);
         const medicines = rows.map((m) => ({
             id: `CAT-${String(m.id_medicamento).padStart(3, '0')}`,
-            activeIngredient: m.principio_activo,
-            commercialName: m.nombre_comercial,
-            presentation: m.presentacion,
-            category: m.categoria,
+            activeIngredient: capitalizeWords(m.principio_activo),
+            commercialName: capitalizeWords(m.nombre_comercial),
+            presentation: formatPresentation(m.presentacion),
+            category: formatCategory(m.categoria),
             availableUnits: Number(m.stock_total) || 0,
             minExpirationDate: '2027-06-30',
             batchNumber: `LOT-${String(m.id_medicamento).padStart(3, '0')}-2026`,

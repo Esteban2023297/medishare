@@ -13,17 +13,30 @@ function isValidEmail(email: string): boolean {
 export async function login(req: Request, res: Response): Promise<void> {
   const { email, password } = req.body;
 
-  if (!email || !isValidEmail(email)) {
-    res.status(400).json({ error: 'Debes ingresar un correo electrónico con formato válido (ej. usuario@gmail.com, tu@you.com).' });
+  const rawEmail = typeof email === 'string' ? email.trim() : '';
+  const rawPassword = typeof password === 'string' ? password.trim() : '';
+
+  if (!rawEmail) {
+    res.status(400).json({ error: 'Debes ingresar tu correo electrónico.' });
     return;
   }
 
-  if (!password || !password.trim()) {
+  if (!isValidEmail(rawEmail)) {
+    res.status(400).json({ error: 'El formato de correo no es válido. Ingresa un correo como usuario@gmail.com o tu@dominio.com.' });
+    return;
+  }
+
+  if (!rawPassword) {
     res.status(400).json({ error: 'Debes ingresar tu contraseña.' });
     return;
   }
 
-  const normalized = email.trim().toLowerCase();
+  if (rawPassword.length < 6) {
+    res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres.' });
+    return;
+  }
+
+  const normalized = rawEmail.toLowerCase();
 
   try {
     const [rows]: [any[], any] = await pool.query(
@@ -35,14 +48,14 @@ export async function login(req: Request, res: Response): Promise<void> {
     );
 
     if (rows.length === 0) {
-      res.status(404).json({ error: 'Usuario no encontrado. Por favor verifica el correo o regístrate.' });
+      res.status(404).json({ error: 'Usuario no encontrado. Por favor verifica el correo o regístrate en la plataforma.' });
       return;
     }
 
     const dbUser = rows[0];
 
     // Validación estricta de contraseña con MySQL
-    if (dbUser.contrasena !== password) {
+    if (dbUser.contrasena !== rawPassword) {
       res.status(401).json({ error: 'Contraseña incorrecta. Por favor verifica tus credenciales.' });
       return;
     }
@@ -75,24 +88,41 @@ export async function login(req: Request, res: Response): Promise<void> {
 
 export async function register(req: Request, res: Response): Promise<void> {
   const { name, email, role, institution, password, contrasena } = req.body;
-  const finalPass = password || contrasena;
+  const rawName = typeof name === 'string' ? name.trim() : '';
+  const rawEmail = typeof email === 'string' ? email.trim() : '';
+  const finalPass = typeof (password || contrasena) === 'string' ? (password || contrasena).trim() : '';
 
-  if (!name || name.trim().length < 3) {
-    res.status(400).json({ error: 'El nombre completo es obligatorio (mínimo 3 caracteres).' });
+  if (!rawName) {
+    res.status(400).json({ error: 'El nombre completo es obligatorio.' });
     return;
   }
 
-  if (!email || !isValidEmail(email)) {
-    res.status(400).json({ error: 'El formato de correo no es válido. Admite cualquier extensión de dominio.' });
+  if (rawName.length < 3) {
+    res.status(400).json({ error: 'El nombre completo debe tener al menos 3 caracteres.' });
     return;
   }
 
-  if (!finalPass || finalPass.trim().length < 6) {
-    res.status(400).json({ error: 'La contraseña es obligatoria y debe tener al menos 6 caracteres.' });
+  if (!rawEmail) {
+    res.status(400).json({ error: 'El correo electrónico es obligatorio.' });
     return;
   }
 
-  const normalized = email.trim().toLowerCase();
+  if (!isValidEmail(rawEmail)) {
+    res.status(400).json({ error: 'El formato de correo no es válido. Ingresa un correo como usuario@gmail.com o usuario@you.com.' });
+    return;
+  }
+
+  if (!finalPass) {
+    res.status(400).json({ error: 'Debes definir una contraseña para la cuenta.' });
+    return;
+  }
+
+  if (finalPass.length < 6) {
+    res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres.' });
+    return;
+  }
+
+  const normalized = rawEmail.toLowerCase();
 
   try {
     const [existing]: [any[], any] = await pool.query('SELECT id_usuario FROM usuarios WHERE LOWER(correo) = ?', [normalized]);

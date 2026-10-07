@@ -4,6 +4,7 @@ exports.apiRouter = void 0;
 const express_1 = require("express");
 const auth_controller_1 = require("../controllers/auth.controller");
 const donations_controller_1 = require("../controllers/donations.controller");
+const database_controller_1 = require("../controllers/database.controller");
 const health_controller_1 = require("../controllers/health.controller");
 const medicines_controller_1 = require("../controllers/medicines.controller");
 const metrics_controller_1 = require("../controllers/metrics.controller");
@@ -11,9 +12,12 @@ const requests_controller_1 = require("../controllers/requests.controller");
 const users_controller_1 = require("../controllers/users.controller");
 const auth_middleware_1 = require("../middlewares/auth.middleware");
 exports.apiRouter = (0, express_1.Router)();
-// Health & Metrics
+// Health, Database & Metrics
 exports.apiRouter.get('/health', health_controller_1.getHealthStatus);
 exports.apiRouter.get('/metrics', metrics_controller_1.getMetrics);
+exports.apiRouter.get('/database/status', database_controller_1.getDatabaseStatus);
+exports.apiRouter.get('/database/tables', database_controller_1.getDatabaseTables);
+exports.apiRouter.get('/database/views', database_controller_1.getDatabaseViews);
 // Autenticación
 exports.apiRouter.post('/auth/login', auth_controller_1.login);
 exports.apiRouter.post('/auth/register', auth_controller_1.register);

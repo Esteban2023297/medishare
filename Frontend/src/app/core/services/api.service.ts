@@ -16,6 +16,11 @@ export class ApiService {
     });
 
     if (typeof localStorage !== 'undefined') {
+      const token = localStorage.getItem('medishare_token');
+      if (token) {
+        headers = headers.set('Authorization', `Bearer ${token}`);
+      }
+
       const savedUser = localStorage.getItem('medishare_user');
       if (savedUser) {
         try {
