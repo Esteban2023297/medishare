@@ -1,0 +1,83 @@
+Instalación de Dependencias:
+
+Bash
+cd Backend
+pnpm install
+cd Frontend
+pnpm install
+
+Configuración del Entorno de Base de Datos (.env):
+Crea un archivo .env en la carpeta del Backend basándote en el ejemplo (.env.example), configurando los parámetros de conexión:
+
+Fragmento de código
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=tu_contraseña
+DB_NAME=medishare_In5bm
+DB_PORT=3306
+Ejecución del Esquema SQL:
+Ejecuta el script ubicado en backend/database/schema.sql en tu gestor MySQL para crear la base de datos medishare_In5bm, sus tablas y vistas analíticas.
+
+Comandos de Ejecución en Desarrollo:
+
+Backend: Ingresa a la carpeta backend y ejecuta pnpm run dev (modo desarrollo con recarga en caliente) o pnpm start.
+
+Frontend: Ingresa a la carpeta frontend y ejecuta pnpm start o ng serve para levantar el servidor de desarrollo de Angular (por lo general en http://localhost:4200).
+
+4. Arquitectura del Backend (Node.js, TypeScript y Express)
+El directorio backend/src organiza la lógica de servidor en módulos clave:
+
+cli/: Herramientas de consola y terminal (terminal-panel.ts) para ejecución de comandos administrativos.
+
+config/: Configuración de la conexión y pool hacia la base de datos (db.ts) y validación de variables de entorno (env.ts).
+
+controllers/: Controladores de negocio para autenticación (auth.controller.ts), operaciones de base de datos (database.controller.ts), gestión de donaciones (donations.controller.ts), diagnósticos (health.controller.ts), catálogo de medicamentos (medicines.controller.ts), métricas y KPIs (metrics.controller.ts), solicitudes clínicas (requests.controller.ts) y usuarios (users.controller.ts).
+
+middlewares/: Capas de seguridad que incluyen validación de tokens JWT (auth.middleware.ts), control de acceso basado en roles RBAC (role.middleware.ts) y validaciones sanitarias (sanitary.middleware.ts).
+
+models/: Estructuras de datos e interfaces tipadas.
+
+routes/: Centraliza todas las rutas REST en api.routes.ts.
+
+server.ts: Punto de entrada principal que inicializa Express, middlewares globales, CORS y controladores de errores.
+
+5. Análisis de la Base de Datos (schema.sql)
+El archivo schema.sql define la estructura relacional de la base de datos medishare_In5bm mediante las siguientes entidades y vistas:
+
+Tablas Principales:
+
+roles: Tipos de usuarios del sistema (Administrador, Donante, Clínico, Paciente).
+
+usuarios: Credenciales de acceso, información personal y relación de roles.
+
+medicamentos: Inventario farmacéutico (nombre, lote, fecha de caducidad y categoría).
+
+donaciones: Registro de fármacos aportados, cantidades y estados.
+
+solicitudes_clinicas: Pedidos de medicamentos solicitados por entidades de salud o pacientes.
+
+Vistas SQL Analíticas:
+
+vista_kpis_donaciones: Resumen estadístico de donaciones exitosas y volumen.
+
+vista_resumen_inventario_categoria: Conteo y stock agrupados por categoría.
+
+vista_usuarios_roles: Relación detallada de usuarios y privilegios.
+
+vista_solicitudes_clinicas_detalle: Información consolidada de pedidos de medicamentos.
+
+vista_donaciones_detalle: Desglose completo de transacciones.
+
+vista_medicamentos_disponibles: Filtro en tiempo real de fármacos aptos para distribución.
+
+6. Arquitectura del Frontend (Angular)
+El Frontend (frontend/src/app) se estructura modularmente bajo características desacopladas:
+
+core/: Modelos transversales (medication.model.ts, user.model.ts), servicios HTTP centralizados (api.service.ts, auth.service.ts, medication.service.ts), validadores y guardias de seguridad (auth.guard.ts).
+
+features/: Módulos funcionales que incluyen admin/, auth/ (login, register), catalog/, dashboard/, donation/, landing/, user-portal/ y user-profile/.
+
+Componentes UI Reutilizables: Pie de página (footer), barra de navegación superior dinámica (navbar) e insignias de estado visuales (status-badge).
+
+7. Tecnologias usadas
+•	HTML, SCSS (angular), PNPM , MySQL, typeScrip, 
