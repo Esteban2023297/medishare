@@ -1,0 +1,249 @@
+openapi: 3.0.3
+info:
+  title: MediShare API
+  description: Documentación oficial de la API REST del proyecto MediShare (Backend Node.js/TypeScript y Express).
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor de Desarrollo Local
+tags:
+  - name: Autenticación
+    description: Endpoints para registro, inicio de sesión y gestión de sesiones.
+  - name: Usuarios
+    description: Gestión de perfiles de usuario y roles.
+  - name: Medicamentos
+    description: Catálogo de fármacos disponibles y control de stock.
+  - name: Donaciones
+    description: Registro y seguimiento de donaciones de medicamentos con validación sanitaria de 90 días.
+  - name: Solicitudes Clínicas
+    description: Pedidos de medicamentos realizados por clínicas y centros comunitarios.
+  - name: Métricas y Dashboard
+    description: Indicadores y KPIs en tiempo real basados en datos de la base de datos.
+  - name: Base de Datos
+    description: Operaciones y mantenimiento del esquema SQL.
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Autenticación
+      summary: Registrar un nuevo usuario
+      description: Crea una cuenta de usuario en el sistema con contraseña protegida mediante hash.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                  example: Carlos Mendoza
+                email:
+                  type: string
+                  example: carlos@email.com
+                password:
+                  type: string
+                  example: password123
+                institucion:
+                  type: string
+                  example: Particular o Clínica Esperanza
+              required:
+                - nombre
+                - email
+                - password
+      responses:
+        '201':
+          description: Usuario registrado exitosamente.
+        '400':
+          description: Datos inválidos o correo ya existente.
+
+  /auth/login:
+    post:
+      tags:
+        - Autenticación
+      summary: Iniciar sesión
+      description: Autentica al usuario mediante credenciales y retorna un token JWT seguro.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: carlos@email.com
+                password:
+                  type: string
+                  example: password123
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          description: Inicio de sesión exitoso con token JWT.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  usuario:
+                    type: object
+        '401':
+          description: Credenciales incorrectas.
+
+  /medicines:
+    get:
+      tags:
+        - Medicamentos
+      summary: Listar medicamentos disponibles
+      description: Obtiene el catálogo de fármacos aprobados en inventario con filtros y paginación.
+      parameters:
+        - name: categoria
+          in: query
+          schema:
+            type: string
+          description: Filtrar por categoría (ej. Analgésicos, Antibióticos)
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Buscar por principio activo o nombre comercial
+      responses:
+        '200':
+          description: Lista de medicamentos obtenida correctamente.
+    post:
+      tags:
+        - Medicamentos
+      summary: Crear medicamento (CRUD)
+      description: Registra un nuevo fármaco en el inventario general del sistema.
+      responses:
+        '201':
+          description: Medicamento creado exitosamente.
+
+  /medicines/{id}:
+    get:
+      tags:
+        - Medicamentos
+      summary: Obtener medicamento por ID
+      responses:
+        '200':
+          description: Detalle del medicamento.
+        '404':
+          description: Medicamento no encontrado.
+    put:
+      tags:
+        - Medicamentos
+      summary: Actualizar medicamento (CRUD)
+      responses:
+        '200':
+          description: Medicamento actualizado correctamente.
+    delete:
+      tags:
+        - Medicamentos
+      summary: Eliminar o desactivar medicamento (CRUD)
+      responses:
+        '200':
+          description: Medicamento eliminado o retirado del catálogo.
+
+  /donations:
+    get:
+      tags:
+        - Donaciones
+      summary: Listar donaciones
+      description: Obtiene el historial de aportes y su estado sanitario (Aprobado, Pendiente, En revisión).
+      responses:
+        '200':
+          description: Listado de donaciones.
+    post:
+      tags:
+        - Donaciones
+      summary: Registrar nueva donación
+      description: Registra un medicamento donado aplicando validación estricta de empaque original y filtro sanitario de 90 días de vigencia.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombreComercial:
+                  type: string
+                principioActivo:
+                  type: string
+                presentacion:
+                  type: string
+                categoriaTerapeutica:
+                  type: string
+                lote:
+                  type: string
+                fechaCaducidad:
+                  type: string
+                  format: date
+                cantidad:
+                  type: integer
+                donante:
+                  type: string
+              required:
+                - nombreComercial
+                - lote
+                - fechaCaducidad
+                - cantidad
+      responses:
+        '201':
+          description: Donación registrada y pendiente de revisión sanitaria.
+        '400':
+          description: Falla en los requisitos sanitarios o fecha menor a 90 días.
+
+  /requests:
+    get:
+      tags:
+        - Solicitudes Clínicas
+      summary: Listar solicitudes clínicas
+      responses:
+        '200':
+          description: Lista de pedidos de medicamentos por parte de clínicas.
+    post:
+      tags:
+        - Solicitudes Clínicas
+      summary: Crear solicitud clínica de medicamentos
+      description: Proceso transaccional donde una institución solicita unidades de un fármaco disponible en inventario.
+      responses:
+        '201':
+          description: Solicitud creada exitosamente en estado pendiente.
+
+  /metrics:
+    get:
+      tags:
+        - Métricas y Dashboard
+      summary: Obtener KPIs e indicadores comunitarios
+      description: Retorna estadísticas en tiempo real (unidades donadas, tratamientos aprobados, trámites en inspección) calculadas desde la base de datos SQL.
+      responses:
+        '200':
+          description: Indicadores calculados correctamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  unidadesDonadas:
+                    type: integer
+                    example: 710
+                  tratamientosAprobados:
+                    type: integer
+                    example: 10
+                  enInspeccion:
+                    type: integer
+                    example: 8
+
+  /health:
+    get:
+      tags:
+        - Base de Datos
+      summary: Healthcheck de la API y conexión SQL
+      responses:
+        '200':
+          description: Servidor operando y conexión a MySQL activa.
